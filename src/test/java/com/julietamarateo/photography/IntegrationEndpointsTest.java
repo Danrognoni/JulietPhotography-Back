@@ -537,6 +537,41 @@ public class IntegrationEndpointsTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Test Álbum XV Actualizado"));
 
+        // Agregar una foto individual al álbum
+        String newPhotoJson = """
+            {
+                "imageUrl": "https://example.com/photo-to-delete.jpg",
+                "caption": "Foto a borrar",
+                "orientation": "portrait"
+            }
+        """;
+        String photoResp = mockMvc.perform(post("/api/albums/test-album-xv/photos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(newPhotoJson)
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").exists())
+                .andExpect(jsonPath("$.imageUrl").value("https://example.com/photo-to-delete.jpg"))
+                .andReturn().getResponse().getContentAsString();
+
+        // Extraer id de la foto agregada
+        com.fasterxml.jackson.databind.JsonNode photoNode = objectMapper.readTree(photoResp);
+        String createdPhotoId = photoNode.get("id").asText();
+
+        // Intento de eliminación sin token debe ser rechazado (401)
+        mockMvc.perform(delete("/api/albums/test-album-xv/photos/" + createdPhotoId))
+                .andExpect(status().isUnauthorized());
+
+        // Eliminación de foto individual con token ADMIN (204 No Content)
+        mockMvc.perform(delete("/api/albums/test-album-xv/photos/" + createdPhotoId)
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isNoContent());
+
+        // Verificar que la foto ya no esté en el álbum
+        mockMvc.perform(get("/api/albums/test-album-xv"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.photos[?(@.id == '" + createdPhotoId + "')]").doesNotExist());
+
         // Eliminar álbum
         mockMvc.perform(delete("/api/albums/test-album-xv")
                         .header("Authorization", "Bearer " + adminToken))

@@ -134,7 +134,7 @@ public class AlbumController {
     public ResponseEntity<Void> deleteAlbumPhoto(
             @PathVariable String id,
             @PathVariable String photoId) {
-        albumService.deletePhoto(photoId);
+        albumService.deleteAlbumPhoto(id, photoId);
         return ResponseEntity.noContent().build();
     }
 

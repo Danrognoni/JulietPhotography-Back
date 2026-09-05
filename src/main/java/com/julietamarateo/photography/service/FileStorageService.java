@@ -8,6 +8,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -107,7 +110,7 @@ public class FileStorageService {
     }
 
     /**
-     * Elimina el archivo de Cloudinary de forma segura a partir de su URL pública.
+     * Elimina el archivo de forma segura a partir de su URL pública (Cloudinary o almacenamiento local).
      */
     public boolean deleteFile(String fileUrl) {
         if (fileUrl == null || fileUrl.isBlank()) {
@@ -124,6 +127,26 @@ public class FileStorageService {
                 }
             } catch (Exception e) {
                 log.error("No se pudo eliminar el archivo de Cloudinary: {} - {}", fileUrl, e.getMessage());
+                return false;
+            }
+        }
+
+        if (fileUrl.startsWith("/uploads/") || fileUrl.startsWith("uploads/")) {
+            try {
+                String relPath = fileUrl.startsWith("/") ? fileUrl.substring(1) : fileUrl;
+                Path filePath = Paths.get(relPath).toAbsolutePath().normalize();
+                boolean deleted = Files.deleteIfExists(filePath);
+
+                // Limpiar también thumbnail local si existe
+                String thumbUrl = getThumbnailUrl(fileUrl);
+                if (thumbUrl != null && !thumbUrl.equals(fileUrl)) {
+                    String thumbRel = thumbUrl.startsWith("/") ? thumbUrl.substring(1) : thumbUrl;
+                    Files.deleteIfExists(Paths.get(thumbRel).toAbsolutePath().normalize());
+                }
+                log.info("Archivo local eliminado: {}, resultado={}", filePath, deleted);
+                return deleted;
+            } catch (Exception e) {
+                log.error("No se pudo eliminar el archivo local: {} - {}", fileUrl, e.getMessage());
                 return false;
             }
         }

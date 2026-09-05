@@ -232,8 +232,14 @@ public class AlbumService {
         if (albumPhoto != null) {
             fileStorageService.deleteFile(albumPhoto.getImageUrl());
             Album album = albumPhoto.getAlbum();
-            if (album != null && album.getPhotos() != null) {
-                album.getPhotos().remove(albumPhoto);
+            if (album != null) {
+                if (album.getPhotos() != null) {
+                    album.getPhotos().remove(albumPhoto);
+                }
+                if (album.getPhotoUrls() != null) {
+                    album.getPhotoUrls().remove(albumPhoto.getImageUrl());
+                }
+                albumRepository.save(album);
             }
             albumPhotoRepository.delete(albumPhoto);
             return;
@@ -248,6 +254,43 @@ public class AlbumService {
         }
 
         throw new ResourceNotFoundException("Foto no encontrada con ID: " + photoId);
+    }
+
+    @Transactional
+    @CacheEvict(value = {"albums", "photos"}, allEntries = true)
+    public void deleteAlbumPhoto(String albumId, String photoId) {
+        AlbumPhoto albumPhoto = albumPhotoRepository.findById(photoId).orElse(null);
+        if (albumPhoto != null) {
+            fileStorageService.deleteFile(albumPhoto.getImageUrl());
+            Album album = albumPhoto.getAlbum();
+            if (album != null) {
+                if (album.getPhotos() != null) {
+                    album.getPhotos().remove(albumPhoto);
+                }
+                if (album.getPhotoUrls() != null) {
+                    album.getPhotoUrls().remove(albumPhoto.getImageUrl());
+                }
+                albumRepository.save(album);
+            }
+            albumPhotoRepository.delete(albumPhoto);
+            return;
+        }
+
+        // Si el álbum tiene photoUrls o la foto está vinculada
+        Album album = albumRepository.findById(albumId)
+                .or(() -> albumRepository.findByNameIgnoreCase(albumId))
+                .orElse(null);
+        if (album != null && album.getPhotoUrls() != null) {
+            boolean removed = album.getPhotoUrls().removeIf(url -> url.equals(photoId) || url.endsWith("/" + photoId));
+            if (removed) {
+                fileStorageService.deleteFile(photoId);
+                albumRepository.save(album);
+                return;
+            }
+        }
+
+        // Fallback a deletePhoto general
+        deletePhoto(photoId);
     }
 
     @Transactional
