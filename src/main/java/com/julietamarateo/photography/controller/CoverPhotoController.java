@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@RequestMapping("/api/cover-photo")
+@RequestMapping({"/api/cover-photo", "/cover-photo"})
 public class CoverPhotoController {
 
     private final CoverPhotoService coverPhotoService;

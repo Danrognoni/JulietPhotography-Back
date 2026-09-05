@@ -1,5 +1,7 @@
 package com.julietamarateo.photography.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.julietamarateo.photography.entity.Photo;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -45,6 +47,10 @@ public class PhotoDto {
 
     private Double height;
 
+    @JsonProperty("rotation")
+    @JsonAlias({"rotation", "rotate", "rot"})
+    private Double rotation = 0.0;
+
     private Integer zIndex = 1;
 
     public PhotoDto() {
@@ -69,6 +75,7 @@ public class PhotoDto {
         dto.setY(entity.getY());
         dto.setWidth(entity.getWidth());
         dto.setHeight(entity.getHeight());
+        dto.setRotation(entity.getRotation() != null ? entity.getRotation() : 0.0);
         dto.setZIndex(entity.getZIndex() != null ? entity.getZIndex() : 1);
 
         if (entity.getCamera() != null || entity.getLens() != null ||
@@ -103,6 +110,7 @@ public class PhotoDto {
         entity.setY(this.y);
         entity.setWidth(this.width);
         entity.setHeight(this.height);
+        entity.setRotation(this.rotation != null ? this.rotation : 0.0);
         entity.setZIndex(this.zIndex != null ? this.zIndex : 1);
 
         if (this.cameraDetails != null) {
@@ -261,5 +269,13 @@ public class PhotoDto {
 
     public void setZIndex(Integer zIndex) {
         this.zIndex = zIndex;
+    }
+
+    public Double getRotation() {
+        return rotation != null ? rotation : 0.0;
+    }
+
+    public void setRotation(Double rotation) {
+        this.rotation = rotation != null ? rotation : 0.0;
     }
 }

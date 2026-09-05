@@ -16,7 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/albums")
+@RequestMapping({"/api/albums", "/albums"})
 public class AlbumController {
 
     private final AlbumService albumService;

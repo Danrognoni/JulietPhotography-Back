@@ -11,7 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/site-content")
+@RequestMapping({"/api/site-content", "/site-content"})
 public class SiteContentController {
 
     private final SiteContentService siteContentService;

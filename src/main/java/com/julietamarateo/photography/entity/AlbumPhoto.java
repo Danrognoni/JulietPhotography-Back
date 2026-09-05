@@ -41,6 +41,9 @@ public class AlbumPhoto {
     @Column(name = "z_index")
     private Integer zIndex = 1;
 
+    @Column(name = "rotation")
+    private Double rotation = 0.0;
+
     @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
@@ -151,5 +154,13 @@ public class AlbumPhoto {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Double getRotation() {
+        return rotation != null ? rotation : 0.0;
+    }
+
+    public void setRotation(Double rotation) {
+        this.rotation = rotation != null ? rotation : 0.0;
     }
 }

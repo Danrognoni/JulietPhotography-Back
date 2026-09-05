@@ -156,6 +156,12 @@ public class PhotoService {
         if (dto.getFeatured() != null) {
             existing.setFeatured(dto.getFeatured());
         }
+        if (dto.getX() != null) existing.setX(dto.getX());
+        if (dto.getY() != null) existing.setY(dto.getY());
+        if (dto.getWidth() != null) existing.setWidth(dto.getWidth());
+        if (dto.getHeight() != null) existing.setHeight(dto.getHeight());
+        if (dto.getRotation() != null) existing.setRotation(dto.getRotation());
+        if (dto.getZIndex() != null) existing.setZIndex(dto.getZIndex());
 
         if (dto.getCameraDetails() != null) {
             if (dto.getCameraDetails().getCamera() != null) existing.setCamera(dto.getCameraDetails().getCamera().trim());
@@ -222,6 +228,9 @@ public class PhotoService {
                 albumPhoto.setY(layout.getY());
                 albumPhoto.setWidth(layout.getWidth());
                 albumPhoto.setHeight(layout.getHeight());
+                if (layout.getRotation() != null) {
+                    albumPhoto.setRotation(layout.getRotation());
+                }
                 if (layout.getZIndex() != null) {
                     albumPhoto.setZIndex(layout.getZIndex());
                 }
@@ -235,6 +244,9 @@ public class PhotoService {
                 photo.setY(layout.getY());
                 photo.setWidth(layout.getWidth());
                 photo.setHeight(layout.getHeight());
+                if (layout.getRotation() != null) {
+                    photo.setRotation(layout.getRotation());
+                }
                 if (layout.getZIndex() != null) {
                     photo.setZIndex(layout.getZIndex());
                 }

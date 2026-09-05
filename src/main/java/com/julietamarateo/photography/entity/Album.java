@@ -41,6 +41,12 @@ public class Album {
     @Column(name = "width")
     private Double width;
 
+    @Column(name = "height")
+    private Double height;
+
+    @Column(name = "rotation")
+    private Double rotation = 0.0;
+
     @Column(name = "z_index")
     private Integer zIndex = 1;
 
@@ -262,5 +268,21 @@ public class Album {
 
     public void setZIndex(Integer zIndex) {
         this.zIndex = zIndex;
+    }
+
+    public Double getHeight() {
+        return height;
+    }
+
+    public void setHeight(Double height) {
+        this.height = height;
+    }
+
+    public Double getRotation() {
+        return rotation != null ? rotation : 0.0;
+    }
+
+    public void setRotation(Double rotation) {
+        this.rotation = rotation != null ? rotation : 0.0;
     }
 }

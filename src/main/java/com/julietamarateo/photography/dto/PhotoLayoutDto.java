@@ -1,5 +1,8 @@
 package com.julietamarateo.photography.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class PhotoLayoutDto {
 
     private String id;
@@ -8,6 +11,10 @@ public class PhotoLayoutDto {
     private Double width;
     private Double height;
     private Integer zIndex;
+
+    @JsonProperty("rotation")
+    @JsonAlias({"rotation", "rotate", "rot"})
+    private Double rotation = 0.0;
 
     public PhotoLayoutDto() {
     }
@@ -19,6 +26,16 @@ public class PhotoLayoutDto {
         this.width = width;
         this.height = height;
         this.zIndex = zIndex;
+    }
+
+    public PhotoLayoutDto(String id, Double x, Double y, Double width, Double height, Integer zIndex, Double rotation) {
+        this.id = id;
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.zIndex = zIndex;
+        this.rotation = rotation;
     }
 
     public String getId() {
@@ -67,5 +84,13 @@ public class PhotoLayoutDto {
 
     public void setZIndex(Integer zIndex) {
         this.zIndex = zIndex;
+    }
+
+    public Double getRotation() {
+        return rotation != null ? rotation : 0.0;
+    }
+
+    public void setRotation(Double rotation) {
+        this.rotation = rotation != null ? rotation : 0.0;
     }
 }

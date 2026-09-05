@@ -20,6 +20,13 @@ public class AlbumLayoutDto {
     @JsonProperty("width")
     private Double width;
 
+    @JsonProperty("height")
+    private Double height;
+
+    @JsonProperty("rotation")
+    @JsonAlias({"rotation", "rotate", "rot"})
+    private Double rotation = 0.0;
+
     @JsonProperty("zIndex")
     @JsonAlias({"zIndex", "zindex", "z_index"})
     private Integer zIndex = 1;
@@ -32,6 +39,16 @@ public class AlbumLayoutDto {
         this.xPos = xPos;
         this.yPos = yPos;
         this.width = width;
+        this.zIndex = zIndex;
+    }
+
+    public AlbumLayoutDto(String id, Double xPos, Double yPos, Double width, Double height, Double rotation, Integer zIndex) {
+        this.id = id;
+        this.xPos = xPos;
+        this.yPos = yPos;
+        this.width = width;
+        this.height = height;
+        this.rotation = rotation;
         this.zIndex = zIndex;
     }
 
@@ -65,6 +82,22 @@ public class AlbumLayoutDto {
 
     public void setWidth(Double width) {
         this.width = width;
+    }
+
+    public Double getHeight() {
+        return height;
+    }
+
+    public void setHeight(Double height) {
+        this.height = height;
+    }
+
+    public Double getRotation() {
+        return rotation != null ? rotation : 0.0;
+    }
+
+    public void setRotation(Double rotation) {
+        this.rotation = rotation != null ? rotation : 0.0;
     }
 
     public Integer getZIndex() {

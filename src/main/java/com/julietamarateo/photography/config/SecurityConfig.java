@@ -30,7 +30,7 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    @Value("${app.cors.allowed-origins:http://localhost:*,http://127.0.0.1:*,https://localhost:*,https://127.0.0.1:*,*}")
+    @Value("${app.cors.allowed-origins:http://localhost:*,http://127.0.0.1:*,https://localhost:*,https://127.0.0.1:*,https://*.vercel.app,https://juli-fotografia-front-oafx.vercel.app,*}")
     private String allowedOrigins;
 
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
@@ -64,27 +64,27 @@ public class SecurityConfig {
                 // Peticiones de preflight CORS siempre permitidas
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 
-                // Endpoints públicos
-                .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/photos/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/site-content/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/profile/**", "/api/about/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/albums/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/cover-photo/**").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/contact").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/orders").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/orders/*/preference").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/mercadopago/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/mercadopago/**").permitAll()
+                // Endpoints públicos de lectura y autenticación (con y sin prefijo /api)
+                .requestMatchers(HttpMethod.POST, "/api/auth/**", "/auth/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/photos/**", "/photos/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/site-content/**", "/site-content/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/profile/**", "/profile/**", "/api/about/**", "/about/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/albums/**", "/albums/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/cover-photo/**", "/cover-photo/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/services/**", "/services/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/contact", "/contact").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/orders/**", "/orders/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/mercadopago/**", "/mercadopago/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/mercadopago/**", "/mercadopago/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
                 .requestMatchers("/error").permitAll()
                 
                 // Endpoints de modificación estrictamente protegidos para el Administrador
-                .requestMatchers(HttpMethod.POST, "/api/admin/**", "/api/photos/**", "/api/site-content/**", "/api/profile/**", "/api/about/**", "/api/albums/**", "/api/cover-photo/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/admin/**", "/api/photos/**", "/api/site-content/**", "/api/profile/**", "/api/about/**", "/api/albums/**", "/api/cover-photo/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/admin/**", "/api/photos/**", "/api/albums/**", "/api/contact/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.GET, "/api/admin/**", "/api/orders/**", "/api/contact/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PATCH, "/api/admin/**", "/api/orders/**", "/api/profile/**", "/api/about/**", "/api/contact/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/admin/**", "/admin/**", "/api/photos/**", "/photos/**", "/api/site-content/**", "/site-content/**", "/api/profile/**", "/profile/**", "/api/about/**", "/about/**", "/api/albums/**", "/albums/**", "/api/cover-photo/**", "/cover-photo/**", "/api/services/**", "/services/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/admin/**", "/admin/**", "/api/photos/**", "/photos/**", "/api/site-content/**", "/site-content/**", "/api/profile/**", "/profile/**", "/api/about/**", "/about/**", "/api/albums/**", "/albums/**", "/api/cover-photo/**", "/cover-photo/**", "/api/services/**", "/services/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/admin/**", "/admin/**", "/api/photos/**", "/photos/**", "/api/albums/**", "/albums/**", "/api/contact/**", "/contact/**", "/api/services/**", "/services/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/admin/**", "/admin/**", "/api/orders/**", "/orders/**", "/api/contact/**", "/contact/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PATCH, "/api/admin/**", "/admin/**", "/api/orders/**", "/orders/**", "/api/profile/**", "/profile/**", "/api/about/**", "/about/**", "/api/contact/**", "/contact/**").hasRole("ADMIN")
                 
                 // Cualquier otra solicitud requiere autenticación
                 .anyRequest().authenticated()

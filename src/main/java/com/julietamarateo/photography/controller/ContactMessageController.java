@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/contact")
+@RequestMapping({"/api/contact", "/contact"})
 public class ContactMessageController {
 
     private final ContactMessageRepository contactMessageRepository;

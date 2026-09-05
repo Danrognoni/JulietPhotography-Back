@@ -13,7 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/services")
+@RequestMapping({"/api/services", "/services"})
 public class ServiceController {
 
     private final ServiceItemService serviceItemService;

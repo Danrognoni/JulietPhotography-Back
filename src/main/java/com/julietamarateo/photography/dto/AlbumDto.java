@@ -44,6 +44,13 @@ public class AlbumDto {
     @JsonProperty("width")
     private Double width;
 
+    @JsonProperty("height")
+    private Double height;
+
+    @JsonProperty("rotation")
+    @JsonAlias({"rotation", "rotate", "rot"})
+    private Double rotation = 0.0;
+
     @JsonProperty("zIndex")
     @JsonAlias({"zIndex", "zindex", "z_index"})
     private Integer zIndex = 1;
@@ -77,6 +84,8 @@ public class AlbumDto {
         dto.setXPos(entity.getXPos());
         dto.setYPos(entity.getYPos());
         dto.setWidth(entity.getWidth());
+        dto.setHeight(entity.getHeight());
+        dto.setRotation(entity.getRotation() != null ? entity.getRotation() : 0.0);
         dto.setZIndex(entity.getZIndex() != null ? entity.getZIndex() : 1);
         dto.setPhotoUrls(entity.getPhotoUrls() != null ? new ArrayList<>(entity.getPhotoUrls()) : new ArrayList<>());
 
@@ -110,6 +119,8 @@ public class AlbumDto {
         entity.setXPos(this.xPos);
         entity.setYPos(this.yPos);
         entity.setWidth(this.width);
+        entity.setHeight(this.height);
+        entity.setRotation(this.rotation != null ? this.rotation : 0.0);
         entity.setZIndex(this.zIndex != null ? this.zIndex : 1);
         entity.setPhotoUrls(this.photoUrls != null ? new ArrayList<>(this.photoUrls) : new ArrayList<>());
         entity.setCreatedAt(this.createdAt != null ? this.createdAt : LocalDateTime.now());
@@ -150,6 +161,12 @@ public class AlbumDto {
         }
         if (this.width != null) {
             entity.setWidth(this.width);
+        }
+        if (this.height != null) {
+            entity.setHeight(this.height);
+        }
+        if (this.rotation != null) {
+            entity.setRotation(this.rotation);
         }
         if (this.zIndex != null) {
             entity.setZIndex(this.zIndex);
@@ -342,5 +359,25 @@ public class AlbumDto {
     @JsonProperty("zIndex")
     public void setZIndex(Integer zIndex) {
         this.zIndex = zIndex;
+    }
+
+    @JsonProperty("height")
+    public Double getHeight() {
+        return height;
+    }
+
+    @JsonProperty("height")
+    public void setHeight(Double height) {
+        this.height = height;
+    }
+
+    @JsonProperty("rotation")
+    public Double getRotation() {
+        return rotation != null ? rotation : 0.0;
+    }
+
+    @JsonProperty("rotation")
+    public void setRotation(Double rotation) {
+        this.rotation = rotation != null ? rotation : 0.0;
     }
 }

@@ -18,7 +18,7 @@ import com.julietamarateo.photography.dto.ReorderPhotosDto;
 import com.julietamarateo.photography.service.AlbumService;
 
 @RestController
-@RequestMapping("/api/photos")
+@RequestMapping({"/api/photos", "/photos"})
 public class PhotoController {
 
     private final PhotoService photoService;

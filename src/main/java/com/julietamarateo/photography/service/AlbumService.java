@@ -174,6 +174,13 @@ public class AlbumService {
                 order
         );
 
+        if (dto.getX() != null) photo.setX(dto.getX());
+        if (dto.getY() != null) photo.setY(dto.getY());
+        if (dto.getWidth() != null) photo.setWidth(dto.getWidth());
+        if (dto.getHeight() != null) photo.setHeight(dto.getHeight());
+        if (dto.getRotation() != null) photo.setRotation(dto.getRotation());
+        if (dto.getZIndex() != null) photo.setZIndex(dto.getZIndex());
+
         AlbumPhoto saved = albumPhotoRepository.save(photo);
         album.getPhotos().add(saved);
         albumRepository.save(album);
@@ -274,6 +281,8 @@ public class AlbumService {
                 if (item.getXPos() != null) album.setXPos(item.getXPos());
                 if (item.getYPos() != null) album.setYPos(item.getYPos());
                 if (item.getWidth() != null) album.setWidth(item.getWidth());
+                if (item.getHeight() != null) album.setHeight(item.getHeight());
+                if (item.getRotation() != null) album.setRotation(item.getRotation());
                 if (item.getZIndex() != null) album.setZIndex(item.getZIndex());
                 album.setUpdatedAt(LocalDateTime.now());
                 albumRepository.save(album);
