@@ -4,6 +4,8 @@ import com.julietamarateo.photography.dto.ServiceItemDto;
 import com.julietamarateo.photography.entity.ServiceItem;
 import com.julietamarateo.photography.exception.ResourceNotFoundException;
 import com.julietamarateo.photography.repository.ServiceRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,6 +26,7 @@ public class ServiceItemService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "services", key = "'all'")
     public List<ServiceItemDto> getAllServices() {
         return serviceRepository.findAllByOrderByCreatedAtAsc().stream()
                 .map(ServiceItemDto::fromEntity)
@@ -31,6 +34,7 @@ public class ServiceItemService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "services", key = "#id")
     public ServiceItemDto getServiceById(String id) {
         ServiceItem item = serviceRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Servicio no encontrado con ID: " + id));
@@ -38,6 +42,7 @@ public class ServiceItemService {
     }
 
     @Transactional
+    @CacheEvict(value = "services", allEntries = true)
     public ServiceItemDto createService(ServiceItemDto dto, MultipartFile file) {
         ServiceItem item = dto.toEntity();
 
@@ -55,6 +60,7 @@ public class ServiceItemService {
     }
 
     @Transactional
+    @CacheEvict(value = "services", allEntries = true)
     public ServiceItemDto updateService(String id, ServiceItemDto dto, MultipartFile file) {
         ServiceItem existing = serviceRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Servicio no encontrado con ID: " + id));
@@ -88,6 +94,7 @@ public class ServiceItemService {
     }
 
     @Transactional
+    @CacheEvict(value = "services", allEntries = true)
     public void deleteService(String id) {
         ServiceItem existing = serviceRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Servicio no encontrado con ID: " + id));
@@ -96,3 +103,4 @@ public class ServiceItemService {
         serviceRepository.delete(existing);
     }
 }
+

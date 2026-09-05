@@ -21,6 +21,8 @@ public class PhotoDto {
 
     private String imageUrl;
 
+    private String thumbnailUrl;
+
     private String description;
 
     private String dimensions;
@@ -46,6 +48,7 @@ public class PhotoDto {
         dto.setCategory(entity.getCategory());
         dto.setPrice(entity.getPrice());
         dto.setImageUrl(entity.getImageUrl());
+        dto.setThumbnailUrl(entity.getThumbnailUrl());
         dto.setDescription(entity.getDescription());
         dto.setDimensions(entity.getDimensions());
         dto.setTechnicalSheet(entity.getTechnicalSheet());
@@ -74,6 +77,7 @@ public class PhotoDto {
         entity.setCategory(this.category);
         entity.setPrice(this.price);
         entity.setImageUrl(this.imageUrl);
+        entity.setThumbnailUrl(this.thumbnailUrl != null ? this.thumbnailUrl : this.imageUrl);
         entity.setDescription(this.description);
         entity.setDimensions(this.dimensions);
         entity.setTechnicalSheet(this.technicalSheet);
@@ -130,6 +134,14 @@ public class PhotoDto {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    public String getThumbnailUrl() {
+        return thumbnailUrl != null && !thumbnailUrl.isBlank() ? thumbnailUrl : imageUrl;
+    }
+
+    public void setThumbnailUrl(String thumbnailUrl) {
+        this.thumbnailUrl = thumbnailUrl;
     }
 
     public String getDescription() {

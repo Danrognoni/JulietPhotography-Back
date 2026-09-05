@@ -70,6 +70,9 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/services/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/profile/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/orders").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/orders/*/preference").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/mercadopago/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/mercadopago/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
                 .requestMatchers("/error").permitAll()
                 

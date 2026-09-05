@@ -3,6 +3,8 @@ package com.julietamarateo.photography.service;
 import com.julietamarateo.photography.dto.ProfileDto;
 import com.julietamarateo.photography.entity.Profile;
 import com.julietamarateo.photography.repository.ProfileRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,6 +23,7 @@ public class ProfileService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "profile", key = "'current'")
     public ProfileDto getProfile() {
         Profile profile = profileRepository.findTopByOrderByIdAsc()
                 .orElseGet(this::createDefaultProfile);
@@ -28,6 +31,7 @@ public class ProfileService {
     }
 
     @Transactional
+    @CacheEvict(value = "profile", allEntries = true)
     public ProfileDto updateProfile(ProfileDto dto) {
         Profile profile = profileRepository.findTopByOrderByIdAsc()
                 .orElseGet(this::createDefaultProfile);
@@ -40,6 +44,7 @@ public class ProfileService {
     }
 
     @Transactional
+    @CacheEvict(value = "profile", allEntries = true)
     public ProfileDto updateProfileImage(MultipartFile file) {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("El archivo de imagen no puede estar vacío");

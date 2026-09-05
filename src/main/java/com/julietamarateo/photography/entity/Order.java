@@ -6,7 +6,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "orders")
+@Table(name = "orders", indexes = {
+    @Index(name = "idx_orders_status", columnList = "status"),
+    @Index(name = "idx_orders_created_at", columnList = "createdAt"),
+    @Index(name = "idx_orders_customer_contact", columnList = "customerContact")
+})
 public class Order {
 
     @Id

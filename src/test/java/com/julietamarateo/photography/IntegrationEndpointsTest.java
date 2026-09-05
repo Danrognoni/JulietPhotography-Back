@@ -320,4 +320,46 @@ public class IntegrationEndpointsTest {
                 .andExpect(jsonPath("$.title").value("Fotógrafa Profesional"))
                 .andExpect(jsonPath("$.imageUrl").value(org.hamcrest.Matchers.containsString("/uploads/profile/")));
     }
+
+    @Test
+    @DisplayName("Optimización I/O: GET /uploads/ debe incluir Cache-Control inmutable y soporte ETag")
+    void testUploadsCacheControlAndEtagHeaders() throws Exception {
+        // Primero subir un archivo para tener un recurso real en /uploads/
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "cache-test.jpg",
+                "image/jpeg",
+                "cache image content".getBytes()
+        );
+
+        String responseContent = mockMvc.perform(multipart("/api/photos")
+                        .file(file)
+                        .param("title", "Foto para Test Cache")
+                        .param("category", "Paisajismo")
+                        .param("price", "120.0")
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.imageUrl").exists())
+                .andExpect(jsonPath("$.thumbnailUrl").exists())
+                .andReturn().getResponse().getContentAsString();
+
+        String imageUrl = com.jayway.jsonpath.JsonPath.read(responseContent, "$.imageUrl");
+
+        // Consultar el recurso estático y verificar cabeceras HTTP de caché y ETag
+        mockMvc.perform(get(imageUrl))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Cache-Control", org.hamcrest.Matchers.containsString("public")))
+                .andExpect(header().string("Cache-Control", org.hamcrest.Matchers.containsString("max-age=31536000")))
+                .andExpect(header().string("Cache-Control", org.hamcrest.Matchers.containsString("immutable")))
+                .andExpect(header().exists("ETag"));
+    }
+
+    @Test
+    @DisplayName("Seguridad: Endpoints de Mercado Pago son accesibles públicamente sin autenticación previa")
+    void testMercadoPagoEndpointsPublicAccess() throws Exception {
+        // Webhook es público y no devuelve 401
+        mockMvc.perform(post("/api/mercadopago/webhook"))
+                .andExpect(status().isOk());
+    }
 }
+

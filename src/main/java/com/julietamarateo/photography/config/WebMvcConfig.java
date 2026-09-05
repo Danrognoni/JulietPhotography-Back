@@ -5,8 +5,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import org.springframework.context.annotation.Bean;
+import org.springframework.http.CacheControl;
+import org.springframework.web.filter.ShallowEtagHeaderFilter;
+
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.concurrent.TimeUnit;
 
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
@@ -17,14 +22,20 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Value("${app.cors.allowed-origins:http://localhost:*,http://127.0.0.1:*,https://localhost:*,https://127.0.0.1:*,*}")
     private String allowedOrigins;
 
+    @Bean
+    public ShallowEtagHeaderFilter shallowEtagHeaderFilter() {
+        return new ShallowEtagHeaderFilter();
+    }
+
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         Path uploadPath = Paths.get(uploadDir).toAbsolutePath().normalize();
         String uploadUri = uploadPath.toUri().toString();
 
-        // Mapear /uploads/** hacia la carpeta física en disco
+        // Mapear /uploads/** hacia la carpeta física en disco con caché inmutable y ETag
         registry.addResourceHandler("/uploads/**")
-                .addResourceLocations(uploadUri + (uploadUri.endsWith("/") ? "" : "/"));
+                .addResourceLocations(uploadUri + (uploadUri.endsWith("/") ? "" : "/"))
+                .setCacheControl(CacheControl.maxAge(365, TimeUnit.DAYS).cachePublic().immutable());
     }
 
     @Override

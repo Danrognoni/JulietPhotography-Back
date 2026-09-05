@@ -4,7 +4,11 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "photos")
+@Table(name = "photos", indexes = {
+    @Index(name = "idx_photos_category", columnList = "category"),
+    @Index(name = "idx_photos_featured", columnList = "featured"),
+    @Index(name = "idx_photos_created_at", columnList = "createdAt")
+})
 public class Photo {
 
     @Id
@@ -22,6 +26,9 @@ public class Photo {
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String imageUrl;
+
+    @Column(columnDefinition = "TEXT")
+    private String thumbnailUrl;
 
     @Column(columnDefinition = "TEXT")
     private String description;
@@ -112,6 +119,14 @@ public class Photo {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    public String getThumbnailUrl() {
+        return thumbnailUrl != null && !thumbnailUrl.isBlank() ? thumbnailUrl : imageUrl;
+    }
+
+    public void setThumbnailUrl(String thumbnailUrl) {
+        this.thumbnailUrl = thumbnailUrl;
     }
 
     public String getDescription() {

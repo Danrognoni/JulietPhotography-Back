@@ -20,6 +20,10 @@
 		<java.version>17</java.version>
 		<jjwt.version>0.12.6</jjwt.version>
 		<sqlite-jdbc.version>3.47.2.0</sqlite-jdbc.version>
+		<thumbnailator.version>0.4.20</thumbnailator.version>
+		<twelvemonkeys.version>3.11.0</twelvemonkeys.version>
+		<caffeine.version>3.1.8</caffeine.version>
+		<mercadopago.version>2.1.28</mercadopago.version>
 	</properties>
 
 	<dependencies>
@@ -74,6 +78,36 @@
 			<artifactId>jjwt-jackson</artifactId>
 			<version>${jjwt.version}</version>
 			<scope>runtime</scope>
+		</dependency>
+
+		<!-- Cache & Caffeine -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-cache</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.github.ben-manes.caffeine</groupId>
+			<artifactId>caffeine</artifactId>
+			<version>${caffeine.version}</version>
+		</dependency>
+
+		<!-- Image Processing & Compression (Thumbnailator + TwelveMonkeys WebP) -->
+		<dependency>
+			<groupId>net.coobird</groupId>
+			<artifactId>thumbnailator</artifactId>
+			<version>${thumbnailator.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.twelvemonkeys.imageio</groupId>
+			<artifactId>imageio-webp</artifactId>
+			<version>${twelvemonkeys.version}</version>
+		</dependency>
+
+		<!-- Mercado Pago SDK -->
+		<dependency>
+			<groupId>com.mercadopago</groupId>
+			<artifactId>sdk-java</artifactId>
+			<version>${mercadopago.version}</version>
 		</dependency>
 
 		<!-- Devtools (opcional para recarga rápida en desarrollo) -->

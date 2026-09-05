@@ -5,6 +5,8 @@ import com.julietamarateo.photography.dto.PhotoDto;
 import com.julietamarateo.photography.entity.Photo;
 import com.julietamarateo.photography.exception.ResourceNotFoundException;
 import com.julietamarateo.photography.repository.PhotoRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +31,7 @@ public class PhotoService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "photos", key = "'all_' + (#category != null ? #category : '') + '_' + (#query != null ? #query : '')")
     public List<PhotoDto> getAllPhotos(String category, String query) {
         List<Photo> photos;
         String cleanCat = (category != null && !category.isBlank() && !category.equalsIgnoreCase("Todos"))
@@ -48,6 +51,7 @@ public class PhotoService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "photos", key = "'paged_' + (#category != null ? #category : '') + '_' + (#query != null ? #query : '') + '_' + #page + '_' + #size")
     public PageResponse<PhotoDto> getPhotosPaged(String category, String query, int page, int size) {
         String cleanCat = (category != null && !category.isBlank() && !category.equalsIgnoreCase("Todos"))
                 ? category.trim()
@@ -76,6 +80,7 @@ public class PhotoService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "photos", key = "'id_' + #id")
     public PhotoDto getPhotoById(String id) {
         Photo photo = photoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Fotografía no encontrada con ID: " + id));
@@ -83,6 +88,7 @@ public class PhotoService {
     }
 
     @Transactional
+    @CacheEvict(value = "photos", allEntries = true)
     public PhotoDto createPhoto(PhotoDto dto, MultipartFile file) {
         Photo photo = dto.toEntity();
 
@@ -90,12 +96,18 @@ public class PhotoService {
             photo.setId("photo-" + System.currentTimeMillis() + "-" + UUID.randomUUID().toString().substring(0, 4));
         }
 
-        // Si se subió un archivo físico, almacenarlo y actualizar la URL pública
+        // Si se subió un archivo físico, almacenarlo y actualizar la URL pública y thumbnail
         if (file != null && !file.isEmpty()) {
             String uploadedUrl = fileStorageService.storeFile(file, "photos");
             photo.setImageUrl(uploadedUrl);
+            photo.setThumbnailUrl(fileStorageService.getThumbnailUrl(uploadedUrl));
         } else if (dto.getImageUrl() != null && !dto.getImageUrl().isBlank()) {
             photo.setImageUrl(dto.getImageUrl().trim());
+            if (dto.getThumbnailUrl() != null && !dto.getThumbnailUrl().isBlank()) {
+                photo.setThumbnailUrl(dto.getThumbnailUrl().trim());
+            } else {
+                photo.setThumbnailUrl(dto.getImageUrl().trim());
+            }
         } else {
             throw new IllegalArgumentException("Debe proporcionar una imagen (archivo o URL)");
         }
@@ -105,6 +117,7 @@ public class PhotoService {
     }
 
     @Transactional
+    @CacheEvict(value = "photos", allEntries = true)
     public PhotoDto updatePhoto(String id, PhotoDto dto, MultipartFile file) {
         Photo existing = photoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Fotografía no encontrada con ID: " + id));
@@ -151,8 +164,12 @@ public class PhotoService {
             fileStorageService.deleteFile(existing.getImageUrl());
             String newUploadedUrl = fileStorageService.storeFile(file, "photos");
             existing.setImageUrl(newUploadedUrl);
+            existing.setThumbnailUrl(fileStorageService.getThumbnailUrl(newUploadedUrl));
         } else if (dto.getImageUrl() != null && !dto.getImageUrl().isBlank()) {
             existing.setImageUrl(dto.getImageUrl().trim());
+            if (dto.getThumbnailUrl() != null && !dto.getThumbnailUrl().isBlank()) {
+                existing.setThumbnailUrl(dto.getThumbnailUrl().trim());
+            }
         }
 
         Photo saved = photoRepository.save(existing);
@@ -160,13 +177,15 @@ public class PhotoService {
     }
 
     @Transactional
+    @CacheEvict(value = "photos", allEntries = true)
     public void deletePhoto(String id) {
         Photo photo = photoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Fotografía no encontrada con ID: " + id));
 
-        // Eliminar archivo físico asociado si reside en /uploads/
+        // Eliminar archivo físico asociado y su thumbnail
         fileStorageService.deleteFile(photo.getImageUrl());
 
         photoRepository.delete(photo);
     }
 }
+
