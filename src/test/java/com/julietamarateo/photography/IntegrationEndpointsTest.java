@@ -361,5 +361,95 @@ public class IntegrationEndpointsTest {
         mockMvc.perform(post("/api/mercadopago/webhook"))
                 .andExpect(status().isOk());
     }
+
+    @Test
+    @DisplayName("Álbumes: Consulta pública GET /api/albums retorna lista de álbumes")
+    void testGetAlbumsPublic() throws Exception {
+        mockMvc.perform(get("/api/albums"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+    }
+
+    @Test
+    @DisplayName("Álbumes: Creación, actualización y eliminación CRUD con seguridad ADMIN")
+    void testAlbumsCrudFlow() throws Exception {
+        String newAlbumJson = """
+            {
+                "id": "test-album-xv",
+                "name": "Test Álbum XV",
+                "category": "Test Álbum XV",
+                "description": "Descripción para test de álbumes",
+                "coverImage": "https://example.com/cover.jpg",
+                "displayOrder": 10
+            }
+        """;
+
+        // Sin token debe ser rechazado
+        mockMvc.perform(post("/api/albums")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(newAlbumJson))
+                .andExpect(status().isUnauthorized());
+
+        // Con token ADMIN se crea exitosamente
+        mockMvc.perform(post("/api/albums")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(newAlbumJson)
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value("test-album-xv"))
+                .andExpect(jsonPath("$.name").value("Test Álbum XV"));
+
+        // Actualizar álbum
+        String updateJson = """
+            {
+                "name": "Test Álbum XV Actualizado",
+                "description": "Nueva descripción actualizada",
+                "coverImage": "https://example.com/cover-updated.jpg"
+            }
+        """;
+        mockMvc.perform(put("/api/albums/test-album-xv")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(updateJson)
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Test Álbum XV Actualizado"));
+
+        // Eliminar álbum
+        mockMvc.perform(delete("/api/albums/test-album-xv")
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @DisplayName("Foto de Portada: GET público y PUT protegido para actualizar portada Hero")
+    void testCoverPhotoFlow() throws Exception {
+        // GET público
+        mockMvc.perform(get("/api/cover-photo"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.imageUrl").exists());
+
+        // PUT sin token debe ser rechazado
+        String updateCoverJson = """
+            {
+                "photoId": "photo-1",
+                "imageUrl": "https://example.com/nueva-portada.jpg",
+                "title": "Portada Hero Test",
+                "category": "Paisajismo"
+            }
+        """;
+        mockMvc.perform(put("/api/cover-photo")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(updateCoverJson))
+                .andExpect(status().isUnauthorized());
+
+        // PUT con token ADMIN se actualiza exitosamente
+        mockMvc.perform(put("/api/cover-photo")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(updateCoverJson)
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.imageUrl").value("https://example.com/nueva-portada.jpg"))
+                .andExpect(jsonPath("$.title").value("Portada Hero Test"));
+    }
 }
 

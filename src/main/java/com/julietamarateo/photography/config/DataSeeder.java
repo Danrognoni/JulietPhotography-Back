@@ -1,9 +1,13 @@
 package com.julietamarateo.photography.config;
 
+import com.julietamarateo.photography.entity.Album;
+import com.julietamarateo.photography.entity.CoverPhoto;
 import com.julietamarateo.photography.entity.Photo;
 import com.julietamarateo.photography.entity.Profile;
 import com.julietamarateo.photography.entity.ServiceItem;
 import com.julietamarateo.photography.entity.User;
+import com.julietamarateo.photography.repository.AlbumRepository;
+import com.julietamarateo.photography.repository.CoverPhotoRepository;
 import com.julietamarateo.photography.repository.PhotoRepository;
 import com.julietamarateo.photography.repository.ProfileRepository;
 import com.julietamarateo.photography.repository.ServiceRepository;
@@ -22,17 +26,23 @@ public class DataSeeder implements CommandLineRunner {
     private final PhotoRepository photoRepository;
     private final ServiceRepository serviceRepository;
     private final ProfileRepository profileRepository;
+    private final AlbumRepository albumRepository;
+    private final CoverPhotoRepository coverPhotoRepository;
     private final PasswordEncoder passwordEncoder;
 
     public DataSeeder(UserRepository userRepository,
                       PhotoRepository photoRepository,
                       ServiceRepository serviceRepository,
                       ProfileRepository profileRepository,
+                      AlbumRepository albumRepository,
+                      CoverPhotoRepository coverPhotoRepository,
                       PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.photoRepository = photoRepository;
         this.serviceRepository = serviceRepository;
         this.profileRepository = profileRepository;
+        this.albumRepository = albumRepository;
+        this.coverPhotoRepository = coverPhotoRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -42,6 +52,8 @@ public class DataSeeder implements CommandLineRunner {
         seedDefaultProfile();
         seedDefaultServices();
         seedDefaultPhotos();
+        seedDefaultAlbums();
+        seedDefaultCoverPhoto();
     }
 
     private void seedAdminUser() {
@@ -205,6 +217,69 @@ public class DataSeeder implements CommandLineRunner {
 
             photoRepository.saveAll(initialPhotos);
             System.out.println(">>> [DataSeeder] 9 Fotografías de portafolio sembradas en SQLite.");
+        }
+    }
+
+    private void seedDefaultAlbums() {
+        if (albumRepository.count() == 0) {
+            List<Album> defaultAlbums = Arrays.asList(
+                    new Album(
+                            "casamientos",
+                            "Casamientos",
+                            "Casamientos",
+                            "Historias de amor, ceremonias íntimas y momentos espontáneos de bodas.",
+                            "",
+                            1
+                    ),
+                    new Album(
+                            "cumpleanos-xv",
+                            "Cumpleaños XV",
+                            "Cumpleaños XV",
+                            "Sesiones previas llenas de estilo, fiesta y vals de 15 años.",
+                            "",
+                            2
+                    ),
+                    new Album(
+                            "eventos",
+                            "Eventos",
+                            "Eventos",
+                            "Celebraciones sociales, aniversarios y registros culturales.",
+                            "",
+                            3
+                    ),
+                    new Album(
+                            "paisajismo",
+                            "Paisajismo",
+                            "Paisajismo",
+                            "Horizontes, dunas y la inmensidad del océano en Mar del Plata.",
+                            "",
+                            4
+                    ),
+                    new Album(
+                            "foto-producto",
+                            "Foto Producto",
+                            "Foto Producto",
+                            "Composiciones gastronómicas y comerciales con iluminación de estudio.",
+                            "",
+                            5
+                    )
+            );
+            albumRepository.saveAll(defaultAlbums);
+            System.out.println(">>> [DataSeeder] 5 Álbumes temáticos sembrados en SQLite.");
+        }
+    }
+
+    private void seedDefaultCoverPhoto() {
+        if (coverPhotoRepository.count() == 0) {
+            CoverPhoto defaultCover = new CoverPhoto(
+                    "photo-1",
+                    "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=85",
+                    "Amanecer en los Acantilados",
+                    "Paisajismo",
+                    "Luz dorada matutina sobre la costa marítima de Mar del Plata, capturando la inmensidad del océano Atlántico y el romper de las olas."
+            );
+            coverPhotoRepository.save(defaultCover);
+            System.out.println(">>> [DataSeeder] Foto de portada Hero sembrada en SQLite.");
         }
     }
 }

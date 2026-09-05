@@ -16,13 +16,17 @@ public class CacheConfig {
     public static final String CACHE_PHOTOS = "photos";
     public static final String CACHE_SERVICES = "services";
     public static final String CACHE_PROFILE = "profile";
+    public static final String CACHE_ALBUMS = "albums";
+    public static final String CACHE_COVER_PHOTO = "coverPhoto";
 
     @Bean
     public CacheManager cacheManager() {
         CaffeineCacheManager cacheManager = new CaffeineCacheManager(
                 CACHE_PHOTOS,
                 CACHE_SERVICES,
-                CACHE_PROFILE
+                CACHE_PROFILE,
+                CACHE_ALBUMS,
+                CACHE_COVER_PHOTO
         );
         cacheManager.setCaffeine(Caffeine.newBuilder()
                 .expireAfterWrite(20, TimeUnit.MINUTES)

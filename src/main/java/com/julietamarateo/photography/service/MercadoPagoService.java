@@ -74,10 +74,23 @@ public class MercadoPagoService {
             items.add(itemRequest);
         }
 
+        // Asegurar URLs válidas incluso si faltan en application.properties
+        String successUrl = (backUrlSuccess != null && !backUrlSuccess.isBlank())
+                ? backUrlSuccess.trim()
+                : "http://localhost:4200/cart?status=approved";
+
+        String failureUrl = (backUrlFailure != null && !backUrlFailure.isBlank())
+                ? backUrlFailure.trim()
+                : "http://localhost:4200/cart?status=rejected";
+
+        String pendingUrl = (backUrlPending != null && !backUrlPending.isBlank())
+                ? backUrlPending.trim()
+                : "http://localhost:4200/cart?status=pending";
+
         PreferenceBackUrlsRequest backUrls = PreferenceBackUrlsRequest.builder()
-                .success(backUrlSuccess)
-                .failure(backUrlFailure)
-                .pending(backUrlPending)
+                .success(successUrl)
+                .failure(failureUrl)
+                .pending(pendingUrl)
                 .build();
 
         PreferenceRequest.PreferenceRequestBuilder requestBuilder = PreferenceRequest.builder()
@@ -87,7 +100,7 @@ public class MercadoPagoService {
                 .externalReference(order.getId());
 
         if (notificationUrl != null && !notificationUrl.isBlank() && !notificationUrl.contains("tu-dominio.com")) {
-            requestBuilder.notificationUrl(notificationUrl);
+            requestBuilder.notificationUrl(notificationUrl.trim());
         }
 
         PreferenceRequest request = requestBuilder.build();
