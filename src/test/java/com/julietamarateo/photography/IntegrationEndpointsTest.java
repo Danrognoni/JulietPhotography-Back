@@ -2,10 +2,8 @@ package com.julietamarateo.photography;
 
 import com.julietamarateo.photography.config.JwtTokenProvider;
 import com.julietamarateo.photography.entity.Photo;
-import com.julietamarateo.photography.entity.ServiceItem;
 import com.julietamarateo.photography.repository.PhotoRepository;
 import com.julietamarateo.photography.repository.ProfileRepository;
-import com.julietamarateo.photography.repository.ServiceRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,9 +33,6 @@ public class IntegrationEndpointsTest {
     private PhotoRepository photoRepository;
 
     @Autowired
-    private ServiceRepository serviceRepository;
-
-    @Autowired
     private ProfileRepository profileRepository;
 
     private String adminToken;
@@ -60,19 +55,6 @@ public class IntegrationEndpointsTest {
                     "Sony Alpha 7 IV", "FE 24-70mm f/2.8 GM II", "f/8.0", "1/250s", "ISO 100",
                     true, "Mar del Plata", true);
             photoRepository.save(p);
-        }
-
-        if (!serviceRepository.existsById("serv-1")) {
-            ServiceItem s = new ServiceItem(
-                    "serv-1",
-                    "Casamientos",
-                    "Cobertura fotográfica integral y sensible para el día de tu boda.",
-                    "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
-                    List.of("Preparativos", "Ceremonia", "Fiesta"),
-                    "https://wa.me/5492281311917",
-                    450.0
-            );
-            serviceRepository.save(s);
         }
     }
 
@@ -131,32 +113,65 @@ public class IntegrationEndpointsTest {
     }
 
     @Test
-    @DisplayName("Edición de Servicio: PUT /api/services/{id} sin JWT debe rechazar con 401 Unauthorized")
-    void testPutServiceWithoutJwtUnauthorized() throws Exception {
-        mockMvc.perform(put("/api/services/serv-1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"title\":\"Servicio No Autorizado\",\"price\":999.0}"))
-                .andExpect(status().isUnauthorized());
-    }
+    @DisplayName("CMS SiteContent: GET /api/site-content es público y PUT con JWT ADMIN persiste los textos")
+    void testSiteContentGetAndPutSuccess() throws Exception {
+        // GET público
+        mockMvc.perform(get("/api/site-content"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.heroTitle").exists());
 
-    @Test
-    @DisplayName("Edición de Servicio: PUT /api/services/{id} con JWT ADMIN debe actualizar correctamente (200 OK)")
-    void testPutServiceWithAdminJwtSuccess() throws Exception {
+        // PUT sin JWT debe rechazar con 401
+        mockMvc.perform(put("/api/site-content")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"heroTitle\":\"The World, Reimagined\"}"))
+                .andExpect(status().isUnauthorized());
+
+        // PUT con JWT ADMIN debe actualizar y persistir
         String updateJson = """
                 {
-                    "title": "Casamientos Premium 2026",
-                    "price": 550.0,
-                    "description": "Cobertura ampliada de bodas y fiestas"
+                    "heroTitle": "The World, Reimagined",
+                    "brandName": "Dennis Wanderlight Studio",
+                    "heroSubtitle": "Exploraciones fotográficas sin filtros"
                 }
                 """;
 
-        mockMvc.perform(put("/api/services/serv-1")
+        mockMvc.perform(put("/api/site-content")
                         .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updateJson))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value("serv-1"))
-                .andExpect(jsonPath("$.title").value("Casamientos Premium 2026"));
+                .andExpect(jsonPath("$.heroTitle").value("The World, Reimagined"))
+                .andExpect(jsonPath("$.brandName").value("Dennis Wanderlight Studio"));
+    }
+
+    @Test
+    @DisplayName("Contacto: POST /api/contact es público y GET /api/contact con JWT ADMIN lista mensajes")
+    void testContactSubmissionAndListing() throws Exception {
+        String contactJson = """
+                {
+                    "name": "Alex Mercer",
+                    "email": "alex@example.com",
+                    "subject": "Expedición a los Andes",
+                    "message": "Hola Dennis, nos encantaría coordinar una cobertura fotográfica."
+                }
+                """;
+
+        // Envío público exitoso
+        mockMvc.perform(post("/api/contact")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(contactJson))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.success").value(true));
+
+        // GET sin auth debe rechazar
+        mockMvc.perform(get("/api/contact"))
+                .andExpect(status().isUnauthorized());
+
+        // GET con JWT ADMIN debe listar los mensajes
+        mockMvc.perform(get("/api/contact")
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
     }
 
     @Test
