@@ -4,6 +4,8 @@ import com.julietamarateo.photography.dto.PageResponse;
 import com.julietamarateo.photography.dto.PhotoDto;
 import com.julietamarateo.photography.entity.Photo;
 import com.julietamarateo.photography.exception.ResourceNotFoundException;
+import com.julietamarateo.photography.entity.AlbumPhoto;
+import com.julietamarateo.photography.repository.AlbumPhotoRepository;
 import com.julietamarateo.photography.repository.PhotoRepository;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -23,10 +25,14 @@ import java.util.stream.Collectors;
 public class PhotoService {
 
     private final PhotoRepository photoRepository;
+    private final AlbumPhotoRepository albumPhotoRepository;
     private final FileStorageService fileStorageService;
 
-    public PhotoService(PhotoRepository photoRepository, FileStorageService fileStorageService) {
+    public PhotoService(PhotoRepository photoRepository,
+                        AlbumPhotoRepository albumPhotoRepository,
+                        FileStorageService fileStorageService) {
         this.photoRepository = photoRepository;
+        this.albumPhotoRepository = albumPhotoRepository;
         this.fileStorageService = fileStorageService;
     }
 
@@ -177,15 +183,26 @@ public class PhotoService {
     }
 
     @Transactional
-    @CacheEvict(value = "photos", allEntries = true)
+    @CacheEvict(value = {"photos", "albums"}, allEntries = true)
     public void deletePhoto(String id) {
-        Photo photo = photoRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Fotografía no encontrada con ID: " + id));
+        Photo photo = photoRepository.findById(id).orElse(null);
+        if (photo != null) {
+            fileStorageService.deleteFile(photo.getImageUrl());
+            photoRepository.delete(photo);
+            return;
+        }
 
-        // Eliminar archivo físico asociado y su thumbnail
-        fileStorageService.deleteFile(photo.getImageUrl());
+        AlbumPhoto albumPhoto = albumPhotoRepository.findById(id).orElse(null);
+        if (albumPhoto != null) {
+            fileStorageService.deleteFile(albumPhoto.getImageUrl());
+            if (albumPhoto.getAlbum() != null && albumPhoto.getAlbum().getPhotos() != null) {
+                albumPhoto.getAlbum().getPhotos().remove(albumPhoto);
+            }
+            albumPhotoRepository.delete(albumPhoto);
+            return;
+        }
 
-        photoRepository.delete(photo);
+        throw new ResourceNotFoundException("Fotografía no encontrada con ID: " + id);
     }
 }
 

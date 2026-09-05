@@ -6,6 +6,8 @@ import com.julietamarateo.photography.entity.Photo;
 import com.julietamarateo.photography.entity.Profile;
 import com.julietamarateo.photography.entity.SiteContent;
 import com.julietamarateo.photography.entity.User;
+import com.julietamarateo.photography.entity.AlbumPhoto;
+import com.julietamarateo.photography.repository.AlbumPhotoRepository;
 import com.julietamarateo.photography.repository.AlbumRepository;
 import com.julietamarateo.photography.repository.CoverPhotoRepository;
 import com.julietamarateo.photography.repository.PhotoRepository;
@@ -28,6 +30,7 @@ public class DataSeeder implements CommandLineRunner {
     private final PhotoRepository photoRepository;
     private final ProfileRepository profileRepository;
     private final AlbumRepository albumRepository;
+    private final AlbumPhotoRepository albumPhotoRepository;
     private final CoverPhotoRepository coverPhotoRepository;
     private final SiteContentRepository siteContentRepository;
     private final PasswordEncoder passwordEncoder;
@@ -36,6 +39,7 @@ public class DataSeeder implements CommandLineRunner {
                       PhotoRepository photoRepository,
                       ProfileRepository profileRepository,
                       AlbumRepository albumRepository,
+                      AlbumPhotoRepository albumPhotoRepository,
                       CoverPhotoRepository coverPhotoRepository,
                       SiteContentRepository siteContentRepository,
                       PasswordEncoder passwordEncoder) {
@@ -43,6 +47,7 @@ public class DataSeeder implements CommandLineRunner {
         this.photoRepository = photoRepository;
         this.profileRepository = profileRepository;
         this.albumRepository = albumRepository;
+        this.albumPhotoRepository = albumPhotoRepository;
         this.coverPhotoRepository = coverPhotoRepository;
         this.siteContentRepository = siteContentRepository;
         this.passwordEncoder = passwordEncoder;
@@ -141,43 +146,72 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void seedDefaultAlbums() {
-        if (albumRepository.count() == 0) {
-            List<Album> defaultAlbums = Arrays.asList(
-                    new Album(
-                            "tokyo-neon-pulse",
-                            "Tokyo Neon Pulse",
-                            "Tokyo Neon Pulse",
-                            "Rain-slicked asphalt, vibrant neon signage, and nocturnal quietude across Shinjuku, Shibuya and Ginza.",
-                            "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=800&q=85",
-                            1
-                    ),
-                    new Album(
-                            "wilderness-peaks",
-                            "Wilderness & Peaks",
-                            "Wilderness & Peaks",
-                            "Rugged granite spires, glacial valleys, and the silence of high altitude summits across Patagonia and the Alps.",
-                            "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=85",
-                            2
-                    ),
-                    new Album(
-                            "silent-deserts",
-                            "Silent Deserts",
-                            "Silent Deserts",
-                            "Vast sandstone monuments, windswept dunes, and ethereal sunsets in Atacama and the American Southwest.",
-                            "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=800&q=85",
-                            3
-                    ),
-                    new Album(
-                            "portraits-edge",
-                            "Portraits of the Edge",
-                            "Portraits of the Edge",
-                            "Human resilience and intimate portraits of dwellers in extreme, beautiful geography.",
-                            "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=85",
-                            4
-                    )
+        if (albumPhotoRepository.count() == 0) {
+            // Limpiar si había álbumes antiguos sin fotos para sincronizar con la plantilla Wix Dennis Wanderlight
+            if (albumRepository.count() > 0 && albumPhotoRepository.count() == 0) {
+                albumRepository.deleteAll();
+            }
+
+            // 1. Tokyo's Neon Pulse (Screenshot 1 & Screenshot 2)
+            Album tokyo = new Album();
+            tokyo.setId("tokyo-neon-pulse");
+            tokyo.setName("Tokyo's Neon Pulse");
+            tokyo.setSubtitle("Tokyo, Japan");
+            tokyo.setCategory("Tokyo's Neon Pulse");
+            tokyo.setDescription("This is the space to provide an in-depth look at the visual narrative and the details within the frame. Show the inspiration that led to this moment, and what you hope to communicate to your audience through this specific piece. You can use this section to share a particular feature that sets it apart from others or highlight a unique part of the creative process.");
+            tokyo.setCoverImage("https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=1200&q=85");
+            tokyo.setDisplayOrder(1);
+            albumRepository.save(tokyo);
+
+            List<AlbumPhoto> tokyoPhotos = Arrays.asList(
+                    new AlbumPhoto("tokyo-p1", tokyo, "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=1200&q=85", "Tokyo Street Pedestrian Crossing in Rain", "portrait", 1),
+                    new AlbumPhoto("tokyo-p2", tokyo, "https://images.unsplash.com/photo-1542051841857-5f90071e7989?auto=format&fit=crop&w=1200&q=85", "Japanese Red Kanji Neon Sign in Night Alleyway", "portrait", 2),
+                    new AlbumPhoto("tokyo-p3", tokyo, "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1200&q=85", "Akihabara Neon Green Sign Reflection", "landscape", 3),
+                    new AlbumPhoto("tokyo-p4", tokyo, "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=1200&q=85", "Traditional Izakaya Lanterns in Midnight Alley", "landscape", 4),
+                    new AlbumPhoto("tokyo-p5", tokyo, "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=1200&q=85", "Neon Corridors and Rain Slicked Tarmac", "portrait", 5),
+                    new AlbumPhoto("tokyo-p6", tokyo, "https://images.unsplash.com/photo-1528164344705-475426879c0d?auto=format&fit=crop&w=1200&q=85", "Twilight Shinjuku Tower Light Trails", "landscape", 6)
             );
-            albumRepository.saveAll(defaultAlbums);
-            System.out.println(">>> [DataSeeder] 4 Álbumes temáticos Dennis Wanderlight sembrados en SQLite.");
+            albumPhotoRepository.saveAll(tokyoPhotos);
+
+            // 2. The Crimson Sands of Wadi Rum (Screenshot 1)
+            Album wadi = new Album();
+            wadi.setId("the-crimson-sands-of-wadi-rum");
+            wadi.setName("The Crimson Sands of Wadi Rum");
+            wadi.setSubtitle("Jordanian Desert");
+            wadi.setCategory("The Crimson Sands of Wadi Rum");
+            wadi.setDescription("Sculpted sandstone monoliths and shifting red dunes stretching to the Martian horizon. An expedition into quiet solitude where wind and millennia have carved monuments of timeless silence.");
+            wadi.setCoverImage("https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=1200&q=85");
+            wadi.setDisplayOrder(2);
+            albumRepository.save(wadi);
+
+            List<AlbumPhoto> wadiPhotos = Arrays.asList(
+                    new AlbumPhoto("wadi-p1", wadi, "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=1200&q=85", "Tall Sandstone Rock Tower Formation", "portrait", 1),
+                    new AlbumPhoto("wadi-p2", wadi, "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=1200&q=85", "Highway Through Red Desert Canyons", "landscape", 2),
+                    new AlbumPhoto("wadi-p3", wadi, "https://images.unsplash.com/photo-1547234935-80c7145ec969?auto=format&fit=crop&w=1200&q=85", "Desert Palm Oasis and Long Evening Shadows", "landscape", 3),
+                    new AlbumPhoto("wadi-p4", wadi, "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=85", "Sunlight Striking Eroded Sandstone Gorges", "portrait", 4)
+            );
+            albumPhotoRepository.saveAll(wadiPhotos);
+
+            // 3. Echoes of the Andean Peaks (Screenshot 1)
+            Album andes = new Album();
+            andes.setId("echoes-of-the-andean-peaks");
+            andes.setName("Echoes of the Andean Peaks");
+            andes.setSubtitle("Patagonia & Andes");
+            andes.setCategory("Echoes of the Andean Peaks");
+            andes.setDescription("Jagged granite spires rising above glacial moraines. Traversing treacherous winds and unyielding terrain to capture the fleeting golden light across high altitude summits.");
+            andes.setCoverImage("https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1200&q=85");
+            andes.setDisplayOrder(3);
+            albumRepository.save(andes);
+
+            List<AlbumPhoto> andesPhotos = Arrays.asList(
+                    new AlbumPhoto("andes-p1", andes, "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1200&q=85", "Summit Ridge Trekkers Against Jagged Mountain Crests", "landscape", 1),
+                    new AlbumPhoto("andes-p2", andes, "https://images.unsplash.com/photo-1486870591958-9b9d0d1dda99?auto=format&fit=crop&w=1200&q=85", "Deep Blue Glacier Ice Formations", "portrait", 2),
+                    new AlbumPhoto("andes-p3", andes, "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=85", "Glacial Valley Basin at Dawn", "landscape", 3),
+                    new AlbumPhoto("andes-p4", andes, "https://images.unsplash.com/photo-1483728642387-6c3bdd6c93e5?auto=format&fit=crop&w=1200&q=85", "Alpenglow Illuminating Alpine Snowfields", "portrait", 4)
+            );
+            albumPhotoRepository.saveAll(andesPhotos);
+
+            System.out.println(">>> [DataSeeder] 3 Álbumes Dennis Wanderlight y 14 Fotos asociadas sembrados con éxito.");
         }
     }
 

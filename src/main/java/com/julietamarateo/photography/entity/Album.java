@@ -19,6 +19,8 @@ public class Album {
     @Column(nullable = false)
     private String name;
 
+    private String subtitle;
+
     private String category;
 
     @Column(columnDefinition = "TEXT")
@@ -30,8 +32,12 @@ public class Album {
     @Column(name = "display_order")
     private Integer displayOrder = 0;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "album_photos", joinColumns = @JoinColumn(name = "album_id"))
+    @OneToMany(mappedBy = "album", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OrderBy("displayOrder ASC, createdAt ASC")
+    private List<AlbumPhoto> photos = new ArrayList<>();
+
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "album_photo_urls", joinColumns = @JoinColumn(name = "album_id"))
     @Column(name = "photo_url")
     private List<String> photoUrls = new ArrayList<>();
 
@@ -51,6 +57,21 @@ public class Album {
         this.coverImage = coverImage;
         this.displayOrder = displayOrder != null ? displayOrder : 0;
         this.photoUrls = new ArrayList<>();
+        this.photos = new ArrayList<>();
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public Album(String id, String title, String subtitle, String description, String coverImageUrl, Integer displayOrder, boolean unused) {
+        this.id = id;
+        this.name = title;
+        this.subtitle = subtitle;
+        this.category = title;
+        this.description = description;
+        this.coverImage = coverImageUrl;
+        this.displayOrder = displayOrder != null ? displayOrder : 0;
+        this.photoUrls = new ArrayList<>();
+        this.photos = new ArrayList<>();
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
@@ -69,6 +90,25 @@ public class Album {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getTitle() {
+        return name;
+    }
+
+    public void setTitle(String title) {
+        this.name = title;
+        if (this.category == null || this.category.isBlank()) {
+            this.category = title;
+        }
+    }
+
+    public String getSubtitle() {
+        return subtitle;
+    }
+
+    public void setSubtitle(String subtitle) {
+        this.subtitle = subtitle;
     }
 
     public String getCategory() {
@@ -95,12 +135,49 @@ public class Album {
         this.coverImage = coverImage;
     }
 
+    public String getCoverImageUrl() {
+        return coverImage;
+    }
+
+    public void setCoverImageUrl(String coverImageUrl) {
+        this.coverImage = coverImageUrl;
+    }
+
     public Integer getDisplayOrder() {
         return displayOrder;
     }
 
     public void setDisplayOrder(Integer displayOrder) {
         this.displayOrder = displayOrder;
+    }
+
+    public Integer getOrder() {
+        return displayOrder;
+    }
+
+    public void setOrder(Integer order) {
+        this.displayOrder = order;
+    }
+
+    public List<AlbumPhoto> getPhotos() {
+        return photos;
+    }
+
+    public void setPhotos(List<AlbumPhoto> photos) {
+        this.photos = photos != null ? photos : new ArrayList<>();
+    }
+
+    public void addPhoto(AlbumPhoto photo) {
+        if (photos == null) photos = new ArrayList<>();
+        photos.add(photo);
+        photo.setAlbum(this);
+    }
+
+    public void removePhoto(AlbumPhoto photo) {
+        if (photos != null) {
+            photos.remove(photo);
+            photo.setAlbum(null);
+        }
     }
 
     public List<String> getPhotoUrls() {

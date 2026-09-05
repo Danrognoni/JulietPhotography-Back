@@ -13,14 +13,19 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+import com.julietamarateo.photography.dto.ReorderPhotosDto;
+import com.julietamarateo.photography.service.AlbumService;
+
 @RestController
 @RequestMapping("/api/photos")
 public class PhotoController {
 
     private final PhotoService photoService;
+    private final AlbumService albumService;
 
-    public PhotoController(PhotoService photoService) {
+    public PhotoController(PhotoService photoService, AlbumService albumService) {
         this.photoService = photoService;
+        this.albumService = albumService;
     }
 
     /**
@@ -111,5 +116,15 @@ public class PhotoController {
     public ResponseEntity<Void> deletePhoto(@PathVariable String id) {
         photoService.deletePhoto(id);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Endpoint protegido para reordenar fotos.
+     */
+    @PutMapping("/reorder")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> reorderPhotos(@RequestBody ReorderPhotosDto dto) {
+        albumService.reorderPhotos(null, dto);
+        return ResponseEntity.ok().build();
     }
 }

@@ -1,6 +1,8 @@
 package com.julietamarateo.photography.controller;
 
 import com.julietamarateo.photography.dto.AlbumDto;
+import com.julietamarateo.photography.dto.AlbumPhotoDto;
+import com.julietamarateo.photography.dto.ReorderPhotosDto;
 import com.julietamarateo.photography.service.AlbumService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -23,7 +25,7 @@ public class AlbumController {
     }
 
     /**
-     * Endpoint público para consultar la lista de todos los álbumes temáticos.
+     * Endpoint público para consultar la lista de todos los álbumes con portada y orden.
      */
     @GetMapping
     public ResponseEntity<List<AlbumDto>> getAllAlbums() {
@@ -32,7 +34,7 @@ public class AlbumController {
     }
 
     /**
-     * Endpoint público para consultar un álbum individual por su ID.
+     * Endpoint público para consultar un álbum individual por su ID o slug, incluyendo fotos ordenadas.
      */
     @GetMapping("/{id}")
     public ResponseEntity<AlbumDto> getAlbumById(@PathVariable String id) {
@@ -88,12 +90,62 @@ public class AlbumController {
     }
 
     /**
-     * Endpoint protegido para eliminar un álbum por su ID.
+     * Endpoint protegido para eliminar un álbum y sus fotos asociadas en cascada.
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteAlbum(@PathVariable String id) {
         albumService.deleteAlbum(id);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Endpoint protegido para asociar una nueva foto al álbum mediante JSON (con URL).
+     */
+    @PostMapping(value = "/{id}/photos", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<AlbumPhotoDto> addPhotoJson(
+            @PathVariable String id,
+            @RequestBody AlbumPhotoDto dto) {
+        AlbumPhotoDto created = albumService.addPhotoToAlbum(id, dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    }
+
+    /**
+     * Endpoint protegido para subir archivo(s) de foto física al álbum (Multipart).
+     */
+    @PostMapping(value = "/{id}/photos", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<AlbumPhotoDto>> addPhotosMultipart(
+            @PathVariable String id,
+            @RequestParam("files") List<MultipartFile> files,
+            @RequestParam(value = "caption", required = false) String caption,
+            @RequestParam(value = "orientation", required = false, defaultValue = "portrait") String orientation) {
+        List<AlbumPhotoDto> created = albumService.addPhotosMultipartToAlbum(id, files, caption, orientation);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    }
+
+    /**
+     * Endpoint protegido para eliminar una foto específica de un álbum.
+     */
+    @DeleteMapping("/{id}/photos/{photoId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deleteAlbumPhoto(
+            @PathVariable String id,
+            @PathVariable String photoId) {
+        albumService.deletePhoto(photoId);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Endpoint protegido para reordenar fotos dentro de un álbum.
+     */
+    @PutMapping("/{id}/photos/reorder")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> reorderAlbumPhotos(
+            @PathVariable String id,
+            @RequestBody ReorderPhotosDto dto) {
+        albumService.reorderPhotos(id, dto);
+        return ResponseEntity.ok().build();
     }
 }

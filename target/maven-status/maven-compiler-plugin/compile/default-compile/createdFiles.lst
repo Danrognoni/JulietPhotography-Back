@@ -4,6 +4,7 @@ com\julietamarateo\photography\service\AuthService.class
 com\julietamarateo\photography\dto\AuthResponse.class
 com\julietamarateo\photography\entity\Album.class
 com\julietamarateo\photography\config\CacheConfig.class
+com\julietamarateo\photography\dto\AlbumPhotoDto.class
 com\julietamarateo\photography\dto\AuthRequest.class
 com\julietamarateo\photography\dto\CameraSpecsDto.class
 com\julietamarateo\photography\controller\PhotoController.class
@@ -38,6 +39,7 @@ com\julietamarateo\photography\controller\MercadoPagoController.class
 com\julietamarateo\photography\JulietPhotographyApplication.class
 com\julietamarateo\photography\service\SiteContentService.class
 com\julietamarateo\photography\controller\OrderController.class
+com\julietamarateo\photography\dto\ReorderPhotosDto.class
 com\julietamarateo\photography\dto\OrderItemDto.class
 com\julietamarateo\photography\dto\ProfileDto.class
 com\julietamarateo\photography\dto\AlbumDto.class
@@ -53,12 +55,15 @@ com\julietamarateo\photography\dto\CoverPhotoDto.class
 com\julietamarateo\photography\service\AlbumService.class
 com\julietamarateo\photography\dto\OrderRequestDto.class
 com\julietamarateo\photography\service\CoverPhotoService.class
+com\julietamarateo\photography\entity\AlbumPhoto.class
 com\julietamarateo\photography\entity\User.class
 com\julietamarateo\photography\entity\PaymentRecord.class
 com\julietamarateo\photography\config\DataSeeder.class
 com\julietamarateo\photography\controller\AuthController.class
 com\julietamarateo\photography\entity\CoverPhoto.class
 com\julietamarateo\photography\exception\ResourceNotFoundException.class
+com\julietamarateo\photography\dto\ReorderPhotosDto$PhotoOrderItem.class
+com\julietamarateo\photography\repository\AlbumPhotoRepository.class
 com\julietamarateo\photography\controller\ContactMessageController.class
 com\julietamarateo\photography\entity\Photo.class
 com\julietamarateo\photography\config\MercadoPagoConfig.class
