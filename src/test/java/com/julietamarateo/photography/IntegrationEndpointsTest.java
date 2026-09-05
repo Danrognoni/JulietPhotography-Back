@@ -4,6 +4,7 @@ import com.julietamarateo.photography.config.JwtTokenProvider;
 import com.julietamarateo.photography.entity.Photo;
 import com.julietamarateo.photography.repository.PhotoRepository;
 import com.julietamarateo.photography.repository.ProfileRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,6 +33,9 @@ public class IntegrationEndpointsTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Autowired
     private JwtTokenProvider jwtTokenProvider;

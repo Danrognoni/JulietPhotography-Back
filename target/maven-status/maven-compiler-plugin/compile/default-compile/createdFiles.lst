@@ -1,6 +1,8 @@
 com\julietamarateo\photography\controller\ProfileController.class
 com\julietamarateo\photography\dto\OrderDto.class
+com\julietamarateo\photography\entity\ServiceItem.class
 com\julietamarateo\photography\service\AuthService.class
+com\julietamarateo\photography\controller\ServiceController.class
 com\julietamarateo\photography\dto\AuthResponse.class
 com\julietamarateo\photography\entity\Album.class
 com\julietamarateo\photography\config\CacheConfig.class
@@ -8,6 +10,7 @@ com\julietamarateo\photography\dto\AlbumPhotoDto.class
 com\julietamarateo\photography\dto\AuthRequest.class
 com\julietamarateo\photography\dto\CameraSpecsDto.class
 com\julietamarateo\photography\controller\PhotoController.class
+com\julietamarateo\photography\dto\ServiceItemDto.class
 com\julietamarateo\photography\config\SecurityConfig.class
 com\julietamarateo\photography\entity\OrderItem.class
 com\julietamarateo\photography\config\JwtAuthenticationFilter.class
@@ -53,12 +56,14 @@ com\julietamarateo\photography\config\CloudinaryConfig.class
 com\julietamarateo\photography\config\JwtTokenProvider.class
 com\julietamarateo\photography\entity\Profile.class
 com\julietamarateo\photography\controller\AdminPhotoController.class
+com\julietamarateo\photography\repository\ServiceRepository.class
 com\julietamarateo\photography\config\DatabasePragmaInitializer.class
 com\julietamarateo\photography\dto\ContactMessageDto.class
 com\julietamarateo\photography\dto\CoverPhotoDto.class
 com\julietamarateo\photography\service\AlbumService.class
 com\julietamarateo\photography\dto\OrderRequestDto.class
 com\julietamarateo\photography\service\CoverPhotoService.class
+com\julietamarateo\photography\service\ServiceItemService.class
 com\julietamarateo\photography\entity\AlbumPhoto.class
 com\julietamarateo\photography\entity\User.class
 com\julietamarateo\photography\entity\PaymentRecord.class
