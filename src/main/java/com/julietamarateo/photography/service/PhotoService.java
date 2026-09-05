@@ -1,9 +1,14 @@
 package com.julietamarateo.photography.service;
 
+import com.julietamarateo.photography.dto.PageResponse;
 import com.julietamarateo.photography.dto.PhotoDto;
 import com.julietamarateo.photography.entity.Photo;
 import com.julietamarateo.photography.exception.ResourceNotFoundException;
 import com.julietamarateo.photography.repository.PhotoRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,6 +45,34 @@ public class PhotoService {
         return photos.stream()
                 .map(PhotoDto::fromEntity)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<PhotoDto> getPhotosPaged(String category, String query, int page, int size) {
+        String cleanCat = (category != null && !category.isBlank() && !category.equalsIgnoreCase("Todos"))
+                ? category.trim()
+                : null;
+        String cleanQuery = (query != null && !query.isBlank()) ? query.trim() : null;
+
+        int pageIndex = Math.max(0, page);
+        int pageSize = size > 0 ? size : 12;
+        Pageable pageable = PageRequest.of(pageIndex, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        Page<Photo> photoPage = photoRepository.searchPhotosPaged(cleanCat, cleanQuery, pageable);
+
+        List<PhotoDto> dtos = photoPage.getContent().stream()
+                .map(PhotoDto::fromEntity)
+                .collect(Collectors.toList());
+
+        return new PageResponse<>(
+                dtos,
+                photoPage.getNumber(),
+                photoPage.getSize(),
+                photoPage.getTotalElements(),
+                photoPage.getTotalPages(),
+                photoPage.isFirst(),
+                photoPage.isLast()
+        );
     }
 
     @Transactional(readOnly = true)

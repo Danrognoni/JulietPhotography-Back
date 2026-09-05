@@ -65,7 +65,7 @@ public class ServiceController {
     /**
      * Endpoint protegido para actualizar un servicio (JSON).
      */
-    @PutMapping(value = "/{id}", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.ALL_VALUE})
+    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ServiceItemDto> updateServiceJson(
             @PathVariable String id,

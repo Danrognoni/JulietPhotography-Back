@@ -1,5 +1,6 @@
 package com.julietamarateo.photography.controller;
 
+import com.julietamarateo.photography.dto.PageResponse;
 import com.julietamarateo.photography.dto.PhotoDto;
 import com.julietamarateo.photography.service.PhotoService;
 import jakarta.validation.Valid;
@@ -31,6 +32,19 @@ public class PhotoController {
             @RequestParam(required = false) String q) {
         List<PhotoDto> photos = photoService.getAllPhotos(category, q);
         return ResponseEntity.ok(photos);
+    }
+
+    /**
+     * Endpoint público para listar fotos paginadas y filtradas en el servidor.
+     */
+    @GetMapping("/paged")
+    public ResponseEntity<PageResponse<PhotoDto>> getPhotosPaged(
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String q,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size) {
+        PageResponse<PhotoDto> response = photoService.getPhotosPaged(category, q, page, size);
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -80,7 +94,7 @@ public class PhotoController {
     /**
      * Endpoint protegido para actualizar una foto enviando JSON.
      */
-    @PutMapping(value = "/{id}", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.ALL_VALUE})
+    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PhotoDto> updatePhotoJson(
             @PathVariable String id,

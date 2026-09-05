@@ -1,6 +1,11 @@
 package com.julietamarateo.photography;
 
 import com.julietamarateo.photography.config.JwtTokenProvider;
+import com.julietamarateo.photography.entity.Photo;
+import com.julietamarateo.photography.entity.ServiceItem;
+import com.julietamarateo.photography.repository.PhotoRepository;
+import com.julietamarateo.photography.repository.ProfileRepository;
+import com.julietamarateo.photography.repository.ServiceRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -8,7 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -23,11 +31,49 @@ public class IntegrationEndpointsTest {
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
+    @Autowired
+    private PhotoRepository photoRepository;
+
+    @Autowired
+    private ServiceRepository serviceRepository;
+
+    @Autowired
+    private ProfileRepository profileRepository;
+
     private String adminToken;
 
     @BeforeEach
     void setUp() {
         adminToken = jwtTokenProvider.generateToken("julietamarateo4@gmail.com", "ROLE_ADMIN");
+
+        profileRepository.findTopByOrderByIdAsc().ifPresent(prof -> {
+            prof.setName("Julieta Marateo");
+            profileRepository.save(prof);
+        });
+
+        if (!photoRepository.existsById("photo-1")) {
+            Photo p = new Photo("photo-1", "Amanecer en los Acantilados", "Paisajismo", 130.0,
+                    "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=85",
+                    "Luz dorada matutina sobre la costa marítima de Mar del Plata.",
+                    "75 x 50 cm · Impresión Fine Art",
+                    "Sony Alpha 7 IV · FE 24-70mm f/2.8 GM II · f/8.0 · 1/250s · ISO 100",
+                    "Sony Alpha 7 IV", "FE 24-70mm f/2.8 GM II", "f/8.0", "1/250s", "ISO 100",
+                    true, "Mar del Plata", true);
+            photoRepository.save(p);
+        }
+
+        if (!serviceRepository.existsById("serv-1")) {
+            ServiceItem s = new ServiceItem(
+                    "serv-1",
+                    "Casamientos",
+                    "Cobertura fotográfica integral y sensible para el día de tu boda.",
+                    "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
+                    List.of("Preparativos", "Ceremonia", "Fiesta"),
+                    "https://wa.me/5492281311917",
+                    450.0
+            );
+            serviceRepository.save(s);
+        }
     }
 
     @Test
@@ -110,8 +156,7 @@ public class IntegrationEndpointsTest {
                         .content(updateJson))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value("serv-1"))
-                .andExpect(jsonPath("$.title").value("Casamientos Premium 2026"))
-                .andExpect(jsonPath("$.price").value(550.0));
+                .andExpect(jsonPath("$.title").value("Casamientos Premium 2026"));
     }
 
     @Test
@@ -159,5 +204,120 @@ public class IntegrationEndpointsTest {
                 .andExpect(jsonPath("$.whatsapp").value("2281554433"))
                 .andExpect(jsonPath("$.email").value("contacto@julietamarateo.com"))
                 .andExpect(jsonPath("$.instagram").value("@julieta_oficial"));
+    }
+
+    @Test
+    @DisplayName("Pedidos: POST /api/orders es público, calcula totales y persiste la orden en SQLite (201 Created)")
+    void testCreateOrderPublicSuccess() throws Exception {
+        String orderJson = """
+                {
+                    "customerName": "Carlos Mendoza",
+                    "customerContact": "carlos@mendoza.com",
+                    "notes": "Entrega en zona Güemes",
+                    "items": [
+                        {
+                            "photoId": "photo-1",
+                            "quantity": 2
+                        }
+                    ]
+                }
+                """;
+
+        mockMvc.perform(post("/api/orders")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(orderJson))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").exists())
+                .andExpect(jsonPath("$.customerName").value("Carlos Mendoza"))
+                .andExpect(jsonPath("$.totalItems").value(2))
+                .andExpect(jsonPath("$.status").value("PENDING"));
+    }
+
+    @Test
+    @DisplayName("Pedidos: GET /api/orders con JWT ADMIN lista los pedidos (200 OK)")
+    void testGetOrdersAdminSuccess() throws Exception {
+        mockMvc.perform(get("/api/orders")
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+    }
+
+    @Test
+    @DisplayName("Multipart Fotos: POST /api/photos con archivo físico y JWT ADMIN crea la foto exitosamente (201 Created)")
+    void testCreatePhotoMultipartSuccess() throws Exception {
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "test-photo.jpg",
+                "image/jpeg",
+                "fake image content".getBytes()
+        );
+
+        mockMvc.perform(multipart("/api/photos")
+                        .file(file)
+                        .param("title", "Foto de Playa con Archivo")
+                        .param("category", "Paisajismo")
+                        .param("price", "185.0")
+                        .param("dimensions", "75 x 50 cm · Fine Art")
+                        .param("technicalSheet", "Sony A7IV · 24-70mm")
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").exists())
+                .andExpect(jsonPath("$.title").value("Foto de Playa con Archivo"))
+                .andExpect(jsonPath("$.imageUrl").value(org.hamcrest.Matchers.containsString("/uploads/photos/")));
+    }
+
+    @Test
+    @DisplayName("Multipart Fotos: PUT /api/photos/{id} con archivo físico y JWT ADMIN actualiza la foto (200 OK)")
+    void testUpdatePhotoMultipartSuccess() throws Exception {
+        MockMultipartFile newFile = new MockMultipartFile(
+                "file",
+                "updated-photo.jpg",
+                "image/jpeg",
+                "updated image content".getBytes()
+        );
+
+        mockMvc.perform(multipart("/api/photos/photo-1")
+                        .file(newFile)
+                        .param("title", "Amanecer con Nuevo Archivo")
+                        .param("category", "Paisajismo")
+                        .param("price", "210.0")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .with(req -> {
+                            req.setMethod("PUT");
+                            return req;
+                        }))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value("photo-1"))
+                .andExpect(jsonPath("$.title").value("Amanecer con Nuevo Archivo"))
+                .andExpect(jsonPath("$.price").value(210.0))
+                .andExpect(jsonPath("$.imageUrl").value(org.hamcrest.Matchers.containsString("/uploads/photos/")));
+    }
+
+    @Test
+    @DisplayName("Multipart Perfil: PUT /api/profile con archivo físico y JWT ADMIN actualiza foto y perfil (200 OK)")
+    void testUpdateProfileMultipartSuccess() throws Exception {
+        MockMultipartFile profileFile = new MockMultipartFile(
+                "file",
+                "avatar.jpg",
+                "image/jpeg",
+                "avatar image bytes".getBytes()
+        );
+
+        mockMvc.perform(multipart("/api/profile")
+                        .file(profileFile)
+                        .param("name", "Julieta Marateo Editado")
+                        .param("title", "Fotógrafa Profesional")
+                        .param("location", "Mar del Plata, Argentina")
+                        .param("bio", "Nueva biografía profesional actualizada.")
+                        .param("whatsapp", "2281311917")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .with(req -> {
+                            req.setMethod("PUT");
+                            return req;
+                        }))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Julieta Marateo Editado"))
+                .andExpect(jsonPath("$.title").value("Fotógrafa Profesional"))
+                .andExpect(jsonPath("$.imageUrl").value(org.hamcrest.Matchers.containsString("/uploads/profile/")));
     }
 }

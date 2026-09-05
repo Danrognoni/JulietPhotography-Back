@@ -157,6 +157,9 @@ public class PhotoDto {
     }
 
     public CameraSpecsDto getCameraDetails() {
+        if (this.cameraDetails == null) {
+            this.cameraDetails = new CameraSpecsDto();
+        }
         return cameraDetails;
     }
 

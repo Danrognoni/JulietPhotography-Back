@@ -31,7 +31,7 @@ public class ProfileController {
     /**
      * Endpoint protegido para actualizar los datos de perfil y contacto (JSON).
      */
-    @PutMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.ALL_VALUE})
+    @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ProfileDto> updateProfile(@Valid @RequestBody ProfileDto dto) {
         ProfileDto updated = profileService.updateProfile(dto);
@@ -47,7 +47,8 @@ public class ProfileController {
             @ModelAttribute ProfileDto dto,
             @RequestParam(value = "file", required = false) MultipartFile file) {
         if (file != null && !file.isEmpty()) {
-            profileService.updateProfileImage(file);
+            ProfileDto imgDto = profileService.updateProfileImage(file);
+            dto.setImageUrl(imgDto.getImageUrl());
         }
         ProfileDto updated = profileService.updateProfile(dto);
         return ResponseEntity.ok(updated);
