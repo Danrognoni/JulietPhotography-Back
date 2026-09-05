@@ -42,6 +42,7 @@ com\julietamarateo\photography\controller\OrderController.class
 com\julietamarateo\photography\dto\ReorderPhotosDto.class
 com\julietamarateo\photography\dto\OrderItemDto.class
 com\julietamarateo\photography\dto\ProfileDto.class
+com\julietamarateo\photography\dto\PhotoLayoutDto.class
 com\julietamarateo\photography\dto\AlbumDto.class
 com\julietamarateo\photography\dto\PhotoDto.class
 com\julietamarateo\photography\config\WebMvcConfig.class
@@ -49,6 +50,7 @@ com\julietamarateo\photography\entity\OrderStatus.class
 com\julietamarateo\photography\repository\CoverPhotoRepository.class
 com\julietamarateo\photography\config\JwtTokenProvider.class
 com\julietamarateo\photography\entity\Profile.class
+com\julietamarateo\photography\controller\AdminPhotoController.class
 com\julietamarateo\photography\config\DatabasePragmaInitializer.class
 com\julietamarateo\photography\dto\ContactMessageDto.class
 com\julietamarateo\photography\dto\CoverPhotoDto.class

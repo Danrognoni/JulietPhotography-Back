@@ -11,6 +11,11 @@ public class AlbumPhotoDto {
     private String caption;
     private String orientation = "portrait";
     private Integer displayOrder = 0;
+    private Double x;
+    private Double y;
+    private Double width;
+    private Double height;
+    private Integer zIndex = 1;
     private LocalDateTime createdAt;
 
     public AlbumPhotoDto() {
@@ -37,6 +42,11 @@ public class AlbumPhotoDto {
         dto.setCaption(entity.getCaption());
         dto.setOrientation(entity.getOrientation());
         dto.setDisplayOrder(entity.getDisplayOrder());
+        dto.setX(entity.getX());
+        dto.setY(entity.getY());
+        dto.setWidth(entity.getWidth());
+        dto.setHeight(entity.getHeight());
+        dto.setZIndex(entity.getZIndex() != null ? entity.getZIndex() : 1);
         dto.setCreatedAt(entity.getCreatedAt());
         return dto;
     }
@@ -95,6 +105,46 @@ public class AlbumPhotoDto {
 
     public void setOrder(Integer order) {
         this.displayOrder = order;
+    }
+
+    public Double getX() {
+        return x;
+    }
+
+    public void setX(Double x) {
+        this.x = x;
+    }
+
+    public Double getY() {
+        return y;
+    }
+
+    public void setY(Double y) {
+        this.y = y;
+    }
+
+    public Double getWidth() {
+        return width;
+    }
+
+    public void setWidth(Double width) {
+        this.width = width;
+    }
+
+    public Double getHeight() {
+        return height;
+    }
+
+    public void setHeight(Double height) {
+        this.height = height;
+    }
+
+    public Integer getZIndex() {
+        return zIndex;
+    }
+
+    public void setZIndex(Integer zIndex) {
+        this.zIndex = zIndex;
     }
 
     public LocalDateTime getCreatedAt() {

@@ -80,11 +80,11 @@ public class SecurityConfig {
                 .requestMatchers("/error").permitAll()
                 
                 // Endpoints de modificación estrictamente protegidos para el Administrador
-                .requestMatchers(HttpMethod.POST, "/api/photos/**", "/api/site-content/**", "/api/profile/**", "/api/about/**", "/api/albums/**", "/api/cover-photo/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/photos/**", "/api/site-content/**", "/api/profile/**", "/api/about/**", "/api/albums/**", "/api/cover-photo/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/photos/**", "/api/albums/**", "/api/contact/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.GET, "/api/orders/**", "/api/contact/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PATCH, "/api/orders/**", "/api/profile/**", "/api/about/**", "/api/contact/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/admin/**", "/api/photos/**", "/api/site-content/**", "/api/profile/**", "/api/about/**", "/api/albums/**", "/api/cover-photo/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/admin/**", "/api/photos/**", "/api/site-content/**", "/api/profile/**", "/api/about/**", "/api/albums/**", "/api/cover-photo/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/admin/**", "/api/photos/**", "/api/albums/**", "/api/contact/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/admin/**", "/api/orders/**", "/api/contact/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PATCH, "/api/admin/**", "/api/orders/**", "/api/profile/**", "/api/about/**", "/api/contact/**").hasRole("ADMIN")
                 
                 // Cualquier otra solicitud requiere autenticación
                 .anyRequest().authenticated()

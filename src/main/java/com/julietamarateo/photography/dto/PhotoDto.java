@@ -37,6 +37,16 @@ public class PhotoDto {
 
     private Boolean featured = false;
 
+    private Double x;
+
+    private Double y;
+
+    private Double width;
+
+    private Double height;
+
+    private Integer zIndex = 1;
+
     public PhotoDto() {
     }
 
@@ -55,6 +65,11 @@ public class PhotoDto {
         dto.setInStock(entity.getInStock());
         dto.setBadge(entity.getBadge());
         dto.setFeatured(entity.getFeatured());
+        dto.setX(entity.getX());
+        dto.setY(entity.getY());
+        dto.setWidth(entity.getWidth());
+        dto.setHeight(entity.getHeight());
+        dto.setZIndex(entity.getZIndex() != null ? entity.getZIndex() : 1);
 
         if (entity.getCamera() != null || entity.getLens() != null ||
             entity.getAperture() != null || entity.getShutter() != null || entity.getIso() != null) {
@@ -84,6 +99,11 @@ public class PhotoDto {
         entity.setInStock(this.inStock != null ? this.inStock : true);
         entity.setBadge(this.badge);
         entity.setFeatured(this.featured != null ? this.featured : false);
+        entity.setX(this.x);
+        entity.setY(this.y);
+        entity.setWidth(this.width);
+        entity.setHeight(this.height);
+        entity.setZIndex(this.zIndex != null ? this.zIndex : 1);
 
         if (this.cameraDetails != null) {
             entity.setCamera(this.cameraDetails.getCamera());
@@ -201,5 +221,45 @@ public class PhotoDto {
 
     public void setFeatured(Boolean featured) {
         this.featured = featured;
+    }
+
+    public Double getX() {
+        return x;
+    }
+
+    public void setX(Double x) {
+        this.x = x;
+    }
+
+    public Double getY() {
+        return y;
+    }
+
+    public void setY(Double y) {
+        this.y = y;
+    }
+
+    public Double getWidth() {
+        return width;
+    }
+
+    public void setWidth(Double width) {
+        this.width = width;
+    }
+
+    public Double getHeight() {
+        return height;
+    }
+
+    public void setHeight(Double height) {
+        this.height = height;
+    }
+
+    public Integer getZIndex() {
+        return zIndex;
+    }
+
+    public void setZIndex(Integer zIndex) {
+        this.zIndex = zIndex;
     }
 }

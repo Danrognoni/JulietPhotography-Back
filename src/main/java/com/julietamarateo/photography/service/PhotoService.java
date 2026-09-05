@@ -2,6 +2,7 @@ package com.julietamarateo.photography.service;
 
 import com.julietamarateo.photography.dto.PageResponse;
 import com.julietamarateo.photography.dto.PhotoDto;
+import com.julietamarateo.photography.dto.PhotoLayoutDto;
 import com.julietamarateo.photography.entity.Photo;
 import com.julietamarateo.photography.exception.ResourceNotFoundException;
 import com.julietamarateo.photography.entity.AlbumPhoto;
@@ -203,6 +204,43 @@ public class PhotoService {
         }
 
         throw new ResourceNotFoundException("Fotografía no encontrada con ID: " + id);
+    }
+
+    @Transactional
+    @CacheEvict(value = {"photos", "albums"}, allEntries = true)
+    public void updatePhotosLayout(List<PhotoLayoutDto> layouts) {
+        if (layouts == null || layouts.isEmpty()) {
+            return;
+        }
+
+        for (PhotoLayoutDto layout : layouts) {
+            if (layout.getId() == null) continue;
+
+            AlbumPhoto albumPhoto = albumPhotoRepository.findById(layout.getId()).orElse(null);
+            if (albumPhoto != null) {
+                albumPhoto.setX(layout.getX());
+                albumPhoto.setY(layout.getY());
+                albumPhoto.setWidth(layout.getWidth());
+                albumPhoto.setHeight(layout.getHeight());
+                if (layout.getZIndex() != null) {
+                    albumPhoto.setZIndex(layout.getZIndex());
+                }
+                albumPhotoRepository.save(albumPhoto);
+                continue;
+            }
+
+            Photo photo = photoRepository.findById(layout.getId()).orElse(null);
+            if (photo != null) {
+                photo.setX(layout.getX());
+                photo.setY(layout.getY());
+                photo.setWidth(layout.getWidth());
+                photo.setHeight(layout.getHeight());
+                if (layout.getZIndex() != null) {
+                    photo.setZIndex(layout.getZIndex());
+                }
+                photoRepository.save(photo);
+            }
+        }
     }
 }
 

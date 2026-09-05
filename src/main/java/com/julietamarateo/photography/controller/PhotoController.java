@@ -2,6 +2,7 @@ package com.julietamarateo.photography.controller;
 
 import com.julietamarateo.photography.dto.PageResponse;
 import com.julietamarateo.photography.dto.PhotoDto;
+import com.julietamarateo.photography.dto.PhotoLayoutDto;
 import com.julietamarateo.photography.service.PhotoService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -125,6 +126,16 @@ public class PhotoController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> reorderPhotos(@RequestBody ReorderPhotosDto dto) {
         albumService.reorderPhotos(null, dto);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * Endpoint protegido para actualizar el layout de fotos en lote.
+     */
+    @PutMapping("/layout")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> updatePhotosLayout(@RequestBody List<PhotoLayoutDto> layouts) {
+        photoService.updatePhotosLayout(layouts);
         return ResponseEntity.ok().build();
     }
 }

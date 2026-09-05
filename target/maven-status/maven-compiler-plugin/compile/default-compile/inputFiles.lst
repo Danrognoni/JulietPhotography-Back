@@ -6,6 +6,7 @@ C:\Users\danro\OneDrive\Escritorio\workSpace\back\src\main\java\com\julietamarat
 C:\Users\danro\OneDrive\Escritorio\workSpace\back\src\main\java\com\julietamarateo\photography\config\MercadoPagoConfig.java
 C:\Users\danro\OneDrive\Escritorio\workSpace\back\src\main\java\com\julietamarateo\photography\config\SecurityConfig.java
 C:\Users\danro\OneDrive\Escritorio\workSpace\back\src\main\java\com\julietamarateo\photography\config\WebMvcConfig.java
+C:\Users\danro\OneDrive\Escritorio\workSpace\back\src\main\java\com\julietamarateo\photography\controller\AdminPhotoController.java
 C:\Users\danro\OneDrive\Escritorio\workSpace\back\src\main\java\com\julietamarateo\photography\controller\AlbumController.java
 C:\Users\danro\OneDrive\Escritorio\workSpace\back\src\main\java\com\julietamarateo\photography\controller\AuthController.java
 C:\Users\danro\OneDrive\Escritorio\workSpace\back\src\main\java\com\julietamarateo\photography\controller\ContactMessageController.java
@@ -28,6 +29,7 @@ C:\Users\danro\OneDrive\Escritorio\workSpace\back\src\main\java\com\julietamarat
 C:\Users\danro\OneDrive\Escritorio\workSpace\back\src\main\java\com\julietamarateo\photography\dto\OrderRequestDto.java
 C:\Users\danro\OneDrive\Escritorio\workSpace\back\src\main\java\com\julietamarateo\photography\dto\PageResponse.java
 C:\Users\danro\OneDrive\Escritorio\workSpace\back\src\main\java\com\julietamarateo\photography\dto\PhotoDto.java
+C:\Users\danro\OneDrive\Escritorio\workSpace\back\src\main\java\com\julietamarateo\photography\dto\PhotoLayoutDto.java
 C:\Users\danro\OneDrive\Escritorio\workSpace\back\src\main\java\com\julietamarateo\photography\dto\PreferenceResponseDto.java
 C:\Users\danro\OneDrive\Escritorio\workSpace\back\src\main\java\com\julietamarateo\photography\dto\ProfileDto.java
 C:\Users\danro\OneDrive\Escritorio\workSpace\back\src\main\java\com\julietamarateo\photography\dto\ReorderPhotosDto.java

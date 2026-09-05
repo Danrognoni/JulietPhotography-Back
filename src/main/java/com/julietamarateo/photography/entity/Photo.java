@@ -52,6 +52,17 @@ public class Photo {
 
     private Boolean featured = false;
 
+    private Double x;
+
+    private Double y;
+
+    private Double width;
+
+    private Double height;
+
+    @Column(name = "z_index")
+    private Integer zIndex = 1;
+
     @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
@@ -215,6 +226,46 @@ public class Photo {
 
     public void setFeatured(Boolean featured) {
         this.featured = featured;
+    }
+
+    public Double getX() {
+        return x;
+    }
+
+    public void setX(Double x) {
+        this.x = x;
+    }
+
+    public Double getY() {
+        return y;
+    }
+
+    public void setY(Double y) {
+        this.y = y;
+    }
+
+    public Double getWidth() {
+        return width;
+    }
+
+    public void setWidth(Double width) {
+        this.width = width;
+    }
+
+    public Double getHeight() {
+        return height;
+    }
+
+    public void setHeight(Double height) {
+        this.height = height;
+    }
+
+    public Integer getZIndex() {
+        return zIndex;
+    }
+
+    public void setZIndex(Integer zIndex) {
+        this.zIndex = zIndex;
     }
 
     public LocalDateTime getCreatedAt() {
