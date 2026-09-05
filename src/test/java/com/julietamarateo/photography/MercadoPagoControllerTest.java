@@ -132,9 +132,10 @@ public class MercadoPagoControllerTest {
     @Test
     @DisplayName("Persistencia PaymentRecord: verifica guardado en base de datos SQLite")
     void testPaymentRecordRepository() {
+        String testPaymentId = "MP-PAY-" + System.currentTimeMillis();
         PaymentRecord record = new PaymentRecord(
                 "ORD-TEST-MP-101",
-                "MP-PAY-55555",
+                testPaymentId,
                 "approved",
                 "accredited",
                 "credit_card",
@@ -145,7 +146,7 @@ public class MercadoPagoControllerTest {
 
         PaymentRecord saved = paymentRecordRepository.save(record);
         org.junit.jupiter.api.Assertions.assertNotNull(saved.getId());
-        org.junit.jupiter.api.Assertions.assertEquals("MP-PAY-55555", saved.getMercadopagoPaymentId());
+        org.junit.jupiter.api.Assertions.assertEquals(testPaymentId, saved.getMercadopagoPaymentId());
         org.junit.jupiter.api.Assertions.assertEquals("approved", saved.getStatus());
     }
 }

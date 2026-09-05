@@ -74,7 +74,7 @@ public class MercadoPagoService {
             items.add(itemRequest);
         }
 
-        // Asegurar URLs válidas incluso si faltan en application.properties
+        // Sanitizar y validar URLs de retorno
         String successUrl = (backUrlSuccess != null && !backUrlSuccess.isBlank())
                 ? backUrlSuccess.trim()
                 : "http://localhost:4200/cart?status=approved";
@@ -93,14 +93,17 @@ public class MercadoPagoService {
                 .pending(pendingUrl)
                 .build();
 
+        log.info("Iniciando creación de preferencia Mercado Pago para orden {}: {} ítems. URLs configuradas -> success: {}, failure: {}, pending: {}",
+                order.getId(), items.size(), successUrl, failureUrl, pendingUrl);
+
         PreferenceRequest.PreferenceRequestBuilder requestBuilder = PreferenceRequest.builder()
                 .items(items)
                 .backUrls(backUrls)
-                .autoReturn("approved")
                 .externalReference(order.getId());
 
         if (notificationUrl != null && !notificationUrl.isBlank() && !notificationUrl.contains("tu-dominio.com")) {
             requestBuilder.notificationUrl(notificationUrl.trim());
+            log.info("Notificación webhook configurada para orden {}: {}", order.getId(), notificationUrl.trim());
         }
 
         PreferenceRequest request = requestBuilder.build();
@@ -109,7 +112,8 @@ public class MercadoPagoService {
             PreferenceClient client = createPreferenceClient();
             Preference preference = client.create(request);
 
-            log.info("Preferencia Mercado Pago generada con éxito para la orden {}: ID={}", order.getId(), preference.getId());
+            log.info("Preferencia Mercado Pago generada con éxito para la orden {}: ID={}, initPoint={}, sandboxInitPoint={}",
+                    order.getId(), preference.getId(), preference.getInitPoint(), preference.getSandboxInitPoint());
             return new PreferenceResponseDto(
                     preference.getId(),
                     preference.getInitPoint(),
