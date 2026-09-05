@@ -1,181 +1,169 @@
 package com.julietamarateo.photography.service;
 
-import net.coobird.thumbnailator.Thumbnails;
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.*;
-import java.util.UUID;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class FileStorageService {
 
     private static final Logger log = LoggerFactory.getLogger(FileStorageService.class);
 
-    private static final int MAX_MAIN_WIDTH = 2048;
-    private static final int MAX_MAIN_HEIGHT = 2048;
-    private static final float MAIN_JPEG_QUALITY = 0.85f;
+    private final Cloudinary cloudinary;
 
-    private static final int MAX_THUMB_WIDTH = 480;
-    private static final int MAX_THUMB_HEIGHT = 480;
-    private static final float THUMB_JPEG_QUALITY = 0.80f;
-
-    private final Path rootLocation;
-
-    public FileStorageService(@Value("${app.upload.dir:uploads}") String uploadDir) {
-        this.rootLocation = Paths.get(uploadDir).toAbsolutePath().normalize();
-        try {
-            Files.createDirectories(this.rootLocation);
-            Files.createDirectories(this.rootLocation.resolve("photos"));
-            Files.createDirectories(this.rootLocation.resolve("services"));
-            Files.createDirectories(this.rootLocation.resolve("profile"));
-        } catch (IOException e) {
-            throw new RuntimeException("No se pudo inicializar la carpeta de almacenamiento de archivos", e);
-        }
+    public FileStorageService(Cloudinary cloudinary) {
+        this.cloudinary = cloudinary;
     }
 
     /**
-     * Almacena y procesa automáticamente la imagen subida:
-     * - Comprime y optimiza la imagen principal (resolución máx 2048px, calidad 85%).
-     * - Genera automáticamente una miniatura (thumbnail) de alto rendimiento (máx 480px, calidad 80%).
-     * - Retorna la URL pública de la imagen principal.
+     * Sube un archivo a Cloudinary y retorna su URL pública segura (secure_url).
+     *
+     * @param file      Archivo multipart subido.
+     * @param subfolder Carpeta de destino en Cloudinary (e.g. photos, profile, services, albums, site).
+     * @return URL pública segura HTTPS del recurso en Cloudinary.
      */
     public String storeFile(MultipartFile file, String subfolder) {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("No se puede almacenar un archivo vacío");
         }
 
-        String originalFilename = StringUtils.cleanPath(file.getOriginalFilename() != null ? file.getOriginalFilename() : "image.jpg");
-        originalFilename = originalFilename.replaceAll("[^a-zA-Z0-9._-]", "_");
+        Map<String, Object> options = new HashMap<>();
+        if (subfolder != null && !subfolder.isBlank()) {
+            options.put("folder", subfolder);
+        }
+        options.put("resource_type", "auto");
 
-        String nameWithoutExt = originalFilename;
-        int dotIndex = originalFilename.lastIndexOf('.');
-        if (dotIndex > 0) {
-            nameWithoutExt = originalFilename.substring(0, dotIndex);
+        byte[] fileBytes;
+        try {
+            fileBytes = file.getBytes();
+        } catch (IOException e) {
+            log.error("Error al leer los bytes del archivo para subida a Cloudinary", e);
+            throw new RuntimeException("Error al leer el archivo: " + e.getMessage(), e);
         }
 
-        String prefix = UUID.randomUUID().toString().substring(0, 12);
-        String uniqueFileName = prefix + "_" + nameWithoutExt + ".jpg";
-        String thumbFileName = prefix + "_" + nameWithoutExt + "_thumb.jpg";
-
         try {
-            Path targetDir = this.rootLocation.resolve(subfolder != null ? subfolder : "");
-            Files.createDirectories(targetDir);
+            Map<?, ?> uploadResult = cloudinary.uploader().upload(
+                    fileBytes,
+                    options.isEmpty() ? ObjectUtils.emptyMap() : options
+            );
 
-            Path targetLocation = targetDir.resolve(uniqueFileName);
-            Path thumbLocation = targetDir.resolve(thumbFileName);
-
-            boolean processed = false;
-            try (InputStream in = file.getInputStream()) {
-                BufferedImage originalImage = ImageIO.read(in);
-                if (originalImage != null) {
-                    BufferedImage convertedImage = prepareOpaqueImage(originalImage);
-
-                    // 1. Versión optimizada principal (Web / Full HD+)
-                    Thumbnails.of(convertedImage)
-                            .size(MAX_MAIN_WIDTH, MAX_MAIN_HEIGHT)
-                            .outputFormat("jpg")
-                            .outputQuality(MAIN_JPEG_QUALITY)
-                            .toFile(targetLocation.toFile());
-
-                    // 2. Miniatura de carga ultrarrápida (Thumbnail)
-                    Thumbnails.of(convertedImage)
-                            .size(MAX_THUMB_WIDTH, MAX_THUMB_HEIGHT)
-                            .outputFormat("jpg")
-                            .outputQuality(THUMB_JPEG_QUALITY)
-                            .toFile(thumbLocation.toFile());
-
-                    processed = true;
-                    log.info("Imagen procesada y comprimida: {} (principal y miniatura generadas)", uniqueFileName);
-                }
-            } catch (Exception e) {
-                log.warn("No se pudo procesar la imagen con Thumbnailator ({}), recurriendo a guardado directo", e.getMessage());
+            String secureUrl = (String) uploadResult.get("secure_url");
+            if (secureUrl == null || secureUrl.isBlank()) {
+                secureUrl = (String) uploadResult.get("url");
             }
 
-            if (!processed) {
-                // Fallback para archivos no decodificables como imagen o bytes de prueba en tests
-                Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
-                Files.copy(file.getInputStream(), thumbLocation, StandardCopyOption.REPLACE_EXISTING);
-            }
-
-            // Retornar ruta pública accesible vía HTTP
-            return "/uploads/" + (subfolder != null && !subfolder.isEmpty() ? subfolder + "/" : "") + uniqueFileName;
-        } catch (IOException ex) {
-            throw new RuntimeException("Error al guardar el archivo físico " + uniqueFileName, ex);
+            log.info("Archivo subido a Cloudinary exitosamente: {}", secureUrl);
+            return secureUrl;
+        } catch (Exception e) {
+            log.error("Error al subir archivo a Cloudinary: {}", e.getMessage(), e);
+            throw new RuntimeException("Error al subir archivo a Cloudinary: " + e.getMessage(), e);
         }
     }
 
     /**
-     * Retorna la URL del thumbnail correspondiente para una URL de imagen guardada.
+     * Sobrecarga para subir archivos a la raíz de Cloudinary sin subcarpeta específica.
+     */
+    public String storeFile(MultipartFile file) {
+        return storeFile(file, null);
+    }
+
+    /**
+     * Retorna la URL del thumbnail correspondiente para una URL de imagen.
+     * Si es una URL de Cloudinary, genera la URL con transformación optimizada al vuelo.
      */
     public String getThumbnailUrl(String fileUrl) {
-        if (fileUrl == null || !fileUrl.startsWith("/uploads/")) {
+        if (fileUrl == null || fileUrl.isBlank()) {
             return fileUrl;
         }
-        if (fileUrl.contains("_thumb.")) {
-            return fileUrl;
+
+        // Si es una URL de Cloudinary, inyectar transformaciones al vuelo para miniatura ultrarrápida
+        if (fileUrl.contains("cloudinary.com") && fileUrl.contains("/upload/")) {
+            if (fileUrl.contains("/upload/c_scale,w_480,q_auto,f_auto/")) {
+                return fileUrl;
+            }
+            return fileUrl.replace("/upload/", "/upload/c_scale,w_480,q_auto,f_auto/");
         }
-        int dotIndex = fileUrl.lastIndexOf('.');
-        if (dotIndex > 0) {
-            return fileUrl.substring(0, dotIndex) + "_thumb.jpg";
+
+        // Compatibilidad hacia atrás para archivos locales previos
+        if (fileUrl.startsWith("/uploads/")) {
+            if (fileUrl.contains("_thumb.")) {
+                return fileUrl;
+            }
+            int dotIndex = fileUrl.lastIndexOf('.');
+            if (dotIndex > 0) {
+                return fileUrl.substring(0, dotIndex) + "_thumb.jpg";
+            }
+            return fileUrl + "_thumb.jpg";
         }
-        return fileUrl + "_thumb.jpg";
+
+        return fileUrl;
     }
 
     /**
-     * Elimina el archivo físico del servidor y su respectivo thumbnail de forma segura.
+     * Elimina el archivo de Cloudinary de forma segura a partir de su URL pública.
      */
     public boolean deleteFile(String fileUrl) {
-        if (fileUrl == null || !fileUrl.startsWith("/uploads/")) {
+        if (fileUrl == null || fileUrl.isBlank()) {
             return false;
         }
 
-        try {
-            String relative = fileUrl.substring("/uploads/".length());
-            Path filePath = this.rootLocation.resolve(relative).normalize();
-
-            // Evitar Path Traversal
-            if (!filePath.startsWith(this.rootLocation)) {
+        if (fileUrl.contains("cloudinary.com")) {
+            try {
+                String publicId = extractPublicId(fileUrl);
+                if (publicId != null && !publicId.isBlank()) {
+                    Map<?, ?> result = cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+                    log.info("Archivo eliminado de Cloudinary: publicId={}, resultado={}", publicId, result.get("result"));
+                    return true;
+                }
+            } catch (Exception e) {
+                log.error("No se pudo eliminar el archivo de Cloudinary: {} - {}", fileUrl, e.getMessage());
                 return false;
             }
-
-            boolean deleted = Files.deleteIfExists(filePath);
-
-            // Eliminar miniatura asociada si existe
-            String thumbUrl = getThumbnailUrl(fileUrl);
-            if (thumbUrl != null && !thumbUrl.equals(fileUrl)) {
-                Path thumbPath = this.rootLocation.resolve(thumbUrl.substring("/uploads/".length())).normalize();
-                if (thumbPath.startsWith(this.rootLocation)) {
-                    Files.deleteIfExists(thumbPath);
-                }
-            }
-
-            return deleted;
-        } catch (IOException e) {
-            log.error("No se pudo eliminar el archivo físico: {} - {}", fileUrl, e.getMessage());
-            return false;
         }
+
+        return false;
     }
 
-    private BufferedImage prepareOpaqueImage(BufferedImage source) {
-        if (source.getTransparency() == BufferedImage.OPAQUE) {
-            return source;
+    /**
+     * Extrae el public_id de Cloudinary a partir de una URL completa.
+     * Ejemplo: https://res.cloudinary.com/demo/image/upload/v1612345678/photos/sample.jpg -> photos/sample
+     */
+    public String extractPublicId(String fileUrl) {
+        if (fileUrl == null) return null;
+        int uploadIdx = fileUrl.indexOf("/upload/");
+        if (uploadIdx == -1) return null;
+
+        String path = fileUrl.substring(uploadIdx + "/upload/".length());
+
+        // Si incluye parámetros de transformación (ej. c_scale,w_480/ o v1234567/)
+        // Ignorar segmentos de transformación si los hay antes del versionado
+        while (path.startsWith("c_") || path.startsWith("w_") || path.startsWith("h_") || path.startsWith("q_")) {
+            int slash = path.indexOf('/');
+            if (slash != -1) {
+                path = path.substring(slash + 1);
+            } else {
+                break;
+            }
         }
-        BufferedImage opaque = new BufferedImage(source.getWidth(), source.getHeight(), BufferedImage.TYPE_INT_RGB);
-        Graphics2D g2d = opaque.createGraphics();
-        g2d.setColor(Color.WHITE);
-        g2d.fillRect(0, 0, source.getWidth(), source.getHeight());
-        g2d.drawImage(source, 0, 0, null);
-        g2d.dispose();
-        return opaque;
+
+        // Si tiene prefijo de versión 'v1234567890/', removerlo
+        if (path.matches("^v[0-9]+/.*")) {
+            path = path.substring(path.indexOf('/') + 1);
+        }
+
+        // Remover extensión de archivo si existe (.jpg, .png, .webp, etc.)
+        int dotIdx = path.lastIndexOf('.');
+        if (dotIdx > 0) {
+            path = path.substring(0, dotIdx);
+        }
+
+        return path;
     }
 }

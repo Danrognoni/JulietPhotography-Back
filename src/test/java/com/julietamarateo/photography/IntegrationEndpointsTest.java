@@ -17,10 +17,17 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
+import com.julietamarateo.photography.service.FileStorageService;
+
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@Import(IntegrationEndpointsTest.MockStorageConfig.class)
 public class IntegrationEndpointsTest {
 
     @Autowired
@@ -37,8 +44,39 @@ public class IntegrationEndpointsTest {
 
     private String adminToken;
 
+    @TestConfiguration
+    static class MockStorageConfig {
+        @Bean
+        @Primary
+        public FileStorageService testFileStorageService() {
+            return new FileStorageService(null) {
+                @Override
+                public String storeFile(org.springframework.web.multipart.MultipartFile file, String subfolder) {
+                    String folder = (subfolder != null && !subfolder.isBlank()) ? subfolder : "photos";
+                    return "https://res.cloudinary.com/julietphotography/image/upload/v1700000000/" + folder + "/test-photo.jpg";
+                }
+
+                @Override
+                public String storeFile(org.springframework.web.multipart.MultipartFile file) {
+                    return storeFile(file, "photos");
+                }
+
+                @Override
+                public String getThumbnailUrl(String fileUrl) {
+                    if (fileUrl == null) return null;
+                    return fileUrl.replace("/upload/", "/upload/c_scale,w_480,q_auto,f_auto/");
+                }
+
+                @Override
+                public boolean deleteFile(String fileUrl) {
+                    return true;
+                }
+            };
+        }
+    }
+
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception {
         adminToken = jwtTokenProvider.generateToken("julietamarateo4@gmail.com", "ROLE_ADMIN");
 
         profileRepository.findTopByOrderByIdAsc().ifPresent(prof -> {
@@ -338,7 +376,8 @@ public class IntegrationEndpointsTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.title").value("Foto de Playa con Archivo"))
-                .andExpect(jsonPath("$.imageUrl").value(org.hamcrest.Matchers.containsString("/uploads/photos/")));
+                .andExpect(jsonPath("$.imageUrl").value(org.hamcrest.Matchers.containsString("res.cloudinary.com")))
+                .andExpect(jsonPath("$.thumbnailUrl").value(org.hamcrest.Matchers.containsString("c_scale,w_480")));
     }
 
     @Test
@@ -365,7 +404,7 @@ public class IntegrationEndpointsTest {
                 .andExpect(jsonPath("$.id").value("photo-1"))
                 .andExpect(jsonPath("$.title").value("Amanecer con Nuevo Archivo"))
                 .andExpect(jsonPath("$.price").value(210.0))
-                .andExpect(jsonPath("$.imageUrl").value(org.hamcrest.Matchers.containsString("/uploads/photos/")));
+                .andExpect(jsonPath("$.imageUrl").value(org.hamcrest.Matchers.containsString("res.cloudinary.com")));
     }
 
     @Test
@@ -393,40 +432,49 @@ public class IntegrationEndpointsTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Julieta Marateo Editado"))
                 .andExpect(jsonPath("$.title").value("Fotógrafa Profesional"))
-                .andExpect(jsonPath("$.imageUrl").value(org.hamcrest.Matchers.containsString("/uploads/profile/")));
+                .andExpect(jsonPath("$.imageUrl").value(org.hamcrest.Matchers.containsString("res.cloudinary.com")));
+    }
+
+    @Test
+    @DisplayName("Admin Photos Multipart: POST /api/admin/photos con archivo físico y JWT ADMIN crea la foto y persiste secure_url")
+    void testCreateAdminPhotoMultipartSuccess() throws Exception {
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "admin-test.jpg",
+                "image/jpeg",
+                "admin image content".getBytes()
+        );
+
+        mockMvc.perform(multipart("/api/admin/photos")
+                        .file(file)
+                        .param("title", "Foto desde Admin")
+                        .param("category", "Eventos")
+                        .param("price", "250.0")
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").exists())
+                .andExpect(jsonPath("$.title").value("Foto desde Admin"))
+                .andExpect(jsonPath("$.imageUrl").value(org.hamcrest.Matchers.containsString("res.cloudinary.com")));
     }
 
     @Test
     @DisplayName("Optimización I/O: GET /uploads/ debe incluir Cache-Control inmutable y soporte ETag")
     void testUploadsCacheControlAndEtagHeaders() throws Exception {
-        // Primero subir un archivo para tener un recurso real en /uploads/
-        MockMultipartFile file = new MockMultipartFile(
-                "file",
-                "cache-test.jpg",
-                "image/jpeg",
-                "cache image content".getBytes()
-        );
+        java.nio.file.Path uploadsDir = java.nio.file.Paths.get("uploads").toAbsolutePath();
+        java.nio.file.Files.createDirectories(uploadsDir);
+        java.nio.file.Path testFile = uploadsDir.resolve("cache-test.jpg");
+        java.nio.file.Files.write(testFile, "cache image content".getBytes());
 
-        String responseContent = mockMvc.perform(multipart("/api/photos")
-                        .file(file)
-                        .param("title", "Foto para Test Cache")
-                        .param("category", "Paisajismo")
-                        .param("price", "120.0")
-                        .header("Authorization", "Bearer " + adminToken))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.imageUrl").exists())
-                .andExpect(jsonPath("$.thumbnailUrl").exists())
-                .andReturn().getResponse().getContentAsString();
-
-        String imageUrl = com.jayway.jsonpath.JsonPath.read(responseContent, "$.imageUrl");
-
-        // Consultar el recurso estático y verificar cabeceras HTTP de caché y ETag
-        mockMvc.perform(get(imageUrl))
-                .andExpect(status().isOk())
-                .andExpect(header().string("Cache-Control", org.hamcrest.Matchers.containsString("public")))
-                .andExpect(header().string("Cache-Control", org.hamcrest.Matchers.containsString("max-age=31536000")))
-                .andExpect(header().string("Cache-Control", org.hamcrest.Matchers.containsString("immutable")))
-                .andExpect(header().exists("ETag"));
+        try {
+            mockMvc.perform(get("/uploads/cache-test.jpg"))
+                    .andExpect(status().isOk())
+                    .andExpect(header().string("Cache-Control", org.hamcrest.Matchers.containsString("public")))
+                    .andExpect(header().string("Cache-Control", org.hamcrest.Matchers.containsString("max-age=31536000")))
+                    .andExpect(header().string("Cache-Control", org.hamcrest.Matchers.containsString("immutable")))
+                    .andExpect(header().exists("ETag"));
+        } finally {
+            java.nio.file.Files.deleteIfExists(testFile);
+        }
     }
 
     @Test

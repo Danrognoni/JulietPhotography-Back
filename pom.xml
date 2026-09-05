@@ -110,6 +110,13 @@
 			<version>${mercadopago.version}</version>
 		</dependency>
 
+		<!-- Cloudinary Java SDK (Cloud Image Storage) -->
+		<dependency>
+			<groupId>com.cloudinary</groupId>
+			<artifactId>cloudinary-http44</artifactId>
+			<version>1.38.0</version>
+		</dependency>
+
 		<!-- Devtools (opcional para recarga rápida en desarrollo) -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
