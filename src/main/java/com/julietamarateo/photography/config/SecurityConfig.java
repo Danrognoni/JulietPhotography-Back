@@ -68,7 +68,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/photos/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/services/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/profile/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/profile/**", "/api/about/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/albums/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/cover-photo/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/orders").permitAll()
@@ -79,11 +79,11 @@ public class SecurityConfig {
                 .requestMatchers("/error").permitAll()
                 
                 // Endpoints de modificación estrictamente protegidos para el Administrador
-                .requestMatchers(HttpMethod.POST, "/api/photos/**", "/api/services/**", "/api/profile/**", "/api/albums/**", "/api/cover-photo/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/photos/**", "/api/services/**", "/api/profile/**", "/api/albums/**", "/api/cover-photo/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/photos/**", "/api/services/**", "/api/profile/**", "/api/about/**", "/api/albums/**", "/api/cover-photo/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/photos/**", "/api/services/**", "/api/profile/**", "/api/about/**", "/api/albums/**", "/api/cover-photo/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/photos/**", "/api/services/**", "/api/albums/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/orders/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PATCH, "/api/orders/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PATCH, "/api/orders/**", "/api/profile/**", "/api/about/**").hasRole("ADMIN")
                 
                 // Cualquier otra solicitud requiere autenticación
                 .anyRequest().authenticated()

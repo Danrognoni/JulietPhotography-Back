@@ -16,6 +16,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -78,10 +79,19 @@ public class DataSeeder implements CommandLineRunner {
                     "Hola, mi nombre es Julieta Marateo. Soy Técnica en Fotografía radicada en Mar del Plata. Me apasiona capturar momentos únicos, encargándome con máxima dedicación tanto de la toma fotográfica como de la postproducción y edición profesional. Ofrezco coberturas para casamientos, cumpleaños de XV y eventos en general, garantizando un recuerdo imborrable con la mejor calidad visual.",
                     "2281311917",
                     "julietamarateo4@gmail.com",
-                    "@julietamph_"
+                    "@julietamph_",
+                    Arrays.asList("Casamientos", "Cumpleaños de XV", "Eventos Sociales & Corporativos", "Retoque & Postproducción")
             );
             profileRepository.save(profile);
             System.out.println(">>> [DataSeeder] Perfil inicial de Julieta Marateo sembrado en SQLite.");
+        } else {
+            profileRepository.findTopByOrderByIdAsc().ifPresent(profile -> {
+                if (profile.getTags() == null || profile.getTags().isEmpty()) {
+                    profile.setTags(new ArrayList<>(Arrays.asList("Casamientos", "Cumpleaños de XV", "Eventos Sociales & Corporativos", "Retoque & Postproducción")));
+                    profileRepository.save(profile);
+                    System.out.println(">>> [DataSeeder] Tags por defecto inicializados en el perfil existente.");
+                }
+            });
         }
     }
 

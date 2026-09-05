@@ -2,6 +2,8 @@ package com.julietamarateo.photography.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "profile")
@@ -30,6 +32,11 @@ public class Profile {
 
     private String instagram;
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "profile_tags", joinColumns = @JoinColumn(name = "profile_id"))
+    @Column(name = "tag")
+    private List<String> tags = new ArrayList<>();
+
     private LocalDateTime updatedAt = LocalDateTime.now();
 
     public Profile() {
@@ -37,6 +44,11 @@ public class Profile {
 
     public Profile(String name, String title, String location, String imageUrl,
                    String bio, String whatsapp, String email, String instagram) {
+        this(name, title, location, imageUrl, bio, whatsapp, email, instagram, new ArrayList<>());
+    }
+
+    public Profile(String name, String title, String location, String imageUrl,
+                   String bio, String whatsapp, String email, String instagram, List<String> tags) {
         this.name = name;
         this.title = title;
         this.location = location;
@@ -45,6 +57,7 @@ public class Profile {
         this.whatsapp = whatsapp;
         this.email = email;
         this.instagram = instagram;
+        this.tags = tags != null ? new ArrayList<>(tags) : new ArrayList<>();
         this.updatedAt = LocalDateTime.now();
     }
 
@@ -118,6 +131,21 @@ public class Profile {
 
     public void setInstagram(String instagram) {
         this.instagram = instagram;
+    }
+
+    public List<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<String> tags) {
+        if (this.tags == null) {
+            this.tags = new ArrayList<>();
+        } else {
+            this.tags.clear();
+        }
+        if (tags != null) {
+            this.tags.addAll(tags);
+        }
     }
 
     public LocalDateTime getUpdatedAt() {

@@ -178,13 +178,14 @@ public class IntegrationEndpointsTest {
     }
 
     @Test
-    @DisplayName("CRUD Perfil: PUT /api/profile con JWT ADMIN actualiza información de contacto y persiste (200 OK)")
+    @DisplayName("CRUD Perfil: PUT /api/profile con JWT ADMIN actualiza información de contacto, tags y persiste (200 OK)")
     void testProfilePutWithAdminJwtSuccessAndPersistence() throws Exception {
         String updateJson = """
                 {
                     "whatsapp": "2281554433",
                     "email": "contacto@julietamarateo.com",
-                    "instagram": "@julieta_oficial"
+                    "instagram": "@julieta_oficial",
+                    "tags": ["Bodas de Destino", "Moda Editorial", "Retoque Avanzado"]
                 }
                 """;
 
@@ -196,14 +197,73 @@ public class IntegrationEndpointsTest {
                 .andExpect(jsonPath("$.name").value("Julieta Marateo"))
                 .andExpect(jsonPath("$.whatsapp").value("2281554433"))
                 .andExpect(jsonPath("$.email").value("contacto@julietamarateo.com"))
-                .andExpect(jsonPath("$.instagram").value("@julieta_oficial"));
+                .andExpect(jsonPath("$.instagram").value("@julieta_oficial"))
+                .andExpect(jsonPath("$.tags[0]").value("Bodas de Destino"))
+                .andExpect(jsonPath("$.tags[1]").value("Moda Editorial"));
 
         // Verificar persistencia consultando con GET
         mockMvc.perform(get("/api/profile"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.whatsapp").value("2281554433"))
                 .andExpect(jsonPath("$.email").value("contacto@julietamarateo.com"))
-                .andExpect(jsonPath("$.instagram").value("@julieta_oficial"));
+                .andExpect(jsonPath("$.instagram").value("@julieta_oficial"))
+                .andExpect(jsonPath("$.tags[0]").value("Bodas de Destino"))
+                .andExpect(jsonPath("$.tags[1]").value("Moda Editorial"));
+    }
+
+    @Test
+    @DisplayName("Sobre Mí / About: Alias /api/about responde en GET público y PUT con JWT ADMIN")
+    void testAboutAliasEndpoints() throws Exception {
+        // GET público en /api/about
+        mockMvc.perform(get("/api/about"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Julieta Marateo"))
+                .andExpect(jsonPath("$.tags").isArray());
+
+        // PUT en /api/about con ADMIN
+        String updateJson = """
+                {
+                    "title": "Fotógrafa & Directora Visual",
+                    "tags": ["Cobertura XV", "Sesiones Fine Art"]
+                }
+                """;
+
+        mockMvc.perform(put("/api/about")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(updateJson))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("Fotógrafa & Directora Visual"))
+                .andExpect(jsonPath("$.tags[0]").value("Cobertura XV"));
+
+        // Verificar que GET /api/about refleja la persistencia
+        mockMvc.perform(get("/api/about"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("Fotógrafa & Directora Visual"))
+                .andExpect(jsonPath("$.tags[0]").value("Cobertura XV"));
+    }
+
+    @Test
+    @DisplayName("Sobre Mí: PATCH /api/profile permite actualización parcial conservando campos existentes")
+    void testProfilePatchEndpoint() throws Exception {
+        String patchJson = """
+                {
+                    "location": "Mar del Plata & CABA, Argentina"
+                }
+                """;
+
+        mockMvc.perform(patch("/api/profile")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(patchJson))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.location").value("Mar del Plata & CABA, Argentina"))
+                .andExpect(jsonPath("$.name").value("Julieta Marateo"));
+
+        // Verificar persistencia
+        mockMvc.perform(get("/api/profile"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.location").value("Mar del Plata & CABA, Argentina"));
     }
 
     @Test

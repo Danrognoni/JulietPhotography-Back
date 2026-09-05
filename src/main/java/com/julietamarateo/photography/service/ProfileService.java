@@ -10,6 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class ProfileService {
@@ -22,11 +24,20 @@ public class ProfileService {
         this.fileStorageService = fileStorageService;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     @Cacheable(value = "profile", key = "'current'")
     public ProfileDto getProfile() {
         Profile profile = profileRepository.findTopByOrderByIdAsc()
                 .orElseGet(this::createDefaultProfile);
+        if (profile.getTags() == null || profile.getTags().isEmpty()) {
+            profile.setTags(new ArrayList<>(List.of(
+                    "Casamientos",
+                    "Cumpleaños de XV",
+                    "Eventos Sociales & Corporativos",
+                    "Retoque & Postproducción"
+            )));
+            profile = profileRepository.save(profile);
+        }
         return ProfileDto.fromEntity(profile);
     }
 
@@ -70,10 +81,11 @@ public class ProfileService {
                 "Técnica en Fotografía",
                 "Mar del Plata, Argentina",
                 "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=85",
-                "Hola, mi nombre es Julieta Marateo. Soy Técnica en Fotografía radicada en Mar del Plata. Me apasiona capturar momentos únicos, encargándome con máxima dedicación tanto de la toma fotográfica como de la postproducción y edición profesional.",
+                "Hola, mi nombre es Julieta Marateo. Soy Técnica en Fotografía radicada en Mar del Plata. Me apasiona capturar momentos únicos, encargándome con máxima dedicación tanto de la toma fotográfica como de la postproducción y edición profesional. Ofrezco coberturas para casamientos, cumpleaños de XV y eventos en general, garantizando un recuerdo imborrable con la mejor calidad visual.",
                 "2281311917",
                 "julietamarateo4@gmail.com",
-                "@julietamph_"
+                "@julietamph_",
+                List.of("Casamientos", "Cumpleaños de XV", "Eventos Sociales & Corporativos", "Retoque & Postproducción")
         );
         return profileRepository.save(defaultProfile);
     }

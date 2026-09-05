@@ -1,8 +1,12 @@
 package com.julietamarateo.photography.dto;
 
 import com.julietamarateo.photography.entity.Profile;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ProfileDto {
 
@@ -23,6 +27,8 @@ public class ProfileDto {
 
     private String instagram;
 
+    private List<String> tags = new ArrayList<>();
+
     public ProfileDto() {
     }
 
@@ -37,6 +43,9 @@ public class ProfileDto {
         dto.setWhatsapp(entity.getWhatsapp());
         dto.setEmail(entity.getEmail());
         dto.setInstagram(entity.getInstagram());
+        if (entity.getTags() != null) {
+            dto.setTags(new ArrayList<>(entity.getTags()));
+        }
         return dto;
     }
 
@@ -65,6 +74,9 @@ public class ProfileDto {
         }
         if (this.instagram != null) {
             entity.setInstagram(this.instagram.trim());
+        }
+        if (this.tags != null) {
+            entity.setTags(new ArrayList<>(this.tags));
         }
     }
 
@@ -130,5 +142,21 @@ public class ProfileDto {
 
     public void setInstagram(String instagram) {
         this.instagram = instagram;
+    }
+
+    public List<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<String> tags) {
+        if (tags != null && tags.size() == 1 && tags.get(0) != null && tags.get(0).trim().startsWith("[")) {
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                this.tags = mapper.readValue(tags.get(0).trim(), new TypeReference<List<String>>() {});
+                return;
+            } catch (Exception ignored) {
+            }
+        }
+        this.tags = tags != null ? new ArrayList<>(tags) : new ArrayList<>();
     }
 }

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@RequestMapping("/api/profile")
+@RequestMapping({"/api/profile", "/api/about"})
 public class ProfileController {
 
     private final ProfileService profileService;
@@ -34,6 +34,26 @@ public class ProfileController {
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ProfileDto> updateProfile(@Valid @RequestBody ProfileDto dto) {
+        ProfileDto updated = profileService.updateProfile(dto);
+        return ResponseEntity.ok(updated);
+    }
+
+    /**
+     * Endpoint protegido para actualizar parcialmente los datos de perfil y contacto (PATCH).
+     */
+    @PatchMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ProfileDto> patchProfile(@RequestBody ProfileDto dto) {
+        ProfileDto updated = profileService.updateProfile(dto);
+        return ResponseEntity.ok(updated);
+    }
+
+    /**
+     * Endpoint protegido para guardar datos de perfil y contacto (POST).
+     */
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ProfileDto> saveProfilePost(@Valid @RequestBody ProfileDto dto) {
         ProfileDto updated = profileService.updateProfile(dto);
         return ResponseEntity.ok(updated);
     }

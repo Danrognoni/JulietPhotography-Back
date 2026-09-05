@@ -16,6 +16,7 @@ com\julietamarateo\photography\config\JwtAuthenticationFilter.class
 com\julietamarateo\photography\repository\OrderRepository.class
 com\julietamarateo\photography\service\MercadoPagoService.class
 com\julietamarateo\photography\entity\Order.class
+com\julietamarateo\photography\dto\ProfileDto$1.class
 com\julietamarateo\photography\dto\PreferenceResponseDto.class
 com\julietamarateo\photography\repository\AlbumRepository.class
 com\julietamarateo\photography\exception\GlobalExceptionHandler.class
