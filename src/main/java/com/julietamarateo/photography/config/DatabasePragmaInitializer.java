@@ -43,8 +43,33 @@ public class DatabasePragmaInitializer {
             statement.execute("PRAGMA cache_size = -64000;");
 
             log.info("PRAGMAs de optimización SQLite aplicados exitosamente (WAL, NORMAL, busy_timeout=5000, cache_size=-64000).");
+
+            // Asegurar que las columnas del layout del canvas existan en la tabla albums de SQLite
+            ensureColumnExists(statement, "albums", "x_pos", "REAL");
+            ensureColumnExists(statement, "albums", "y_pos", "REAL");
+            ensureColumnExists(statement, "albums", "width", "REAL");
+            ensureColumnExists(statement, "albums", "z_index", "INTEGER DEFAULT 1");
         } catch (SQLException e) {
-            log.warn("No se pudieron inicializar algunos PRAGMAs de SQLite: {}", e.getMessage());
+            log.warn("No se pudieron inicializar algunos PRAGMAs o columnas de SQLite: {}", e.getMessage());
+        }
+    }
+
+    private void ensureColumnExists(Statement statement, String table, String column, String type) {
+        try (ResultSet rs = statement.executeQuery("PRAGMA table_info(" + table + ");")) {
+            boolean exists = false;
+            while (rs.next()) {
+                String colName = rs.getString("name");
+                if (column.equalsIgnoreCase(colName)) {
+                    exists = true;
+                    break;
+                }
+            }
+            if (!exists) {
+                statement.execute("ALTER TABLE " + table + " ADD COLUMN " + column + " " + type + ";");
+                log.info("Columna {} agregada exitosamente a la tabla {}.", column, table);
+            }
+        } catch (SQLException e) {
+            log.warn("No se pudo verificar o agregar columna {}.{}: {}", table, column, e.getMessage());
         }
     }
 }

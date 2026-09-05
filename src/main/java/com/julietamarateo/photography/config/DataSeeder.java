@@ -161,6 +161,10 @@ public class DataSeeder implements CommandLineRunner {
             tokyo.setDescription("This is the space to provide an in-depth look at the visual narrative and the details within the frame. Show the inspiration that led to this moment, and what you hope to communicate to your audience through this specific piece. You can use this section to share a particular feature that sets it apart from others or highlight a unique part of the creative process.");
             tokyo.setCoverImage("https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=1200&q=85");
             tokyo.setDisplayOrder(1);
+            tokyo.setXPos(4.0);
+            tokyo.setYPos(2.0);
+            tokyo.setWidth(28.0);
+            tokyo.setZIndex(1);
             albumRepository.save(tokyo);
 
             List<AlbumPhoto> tokyoPhotos = Arrays.asList(
@@ -182,6 +186,10 @@ public class DataSeeder implements CommandLineRunner {
             wadi.setDescription("Sculpted sandstone monoliths and shifting red dunes stretching to the Martian horizon. An expedition into quiet solitude where wind and millennia have carved monuments of timeless silence.");
             wadi.setCoverImage("https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=1200&q=85");
             wadi.setDisplayOrder(2);
+            wadi.setXPos(35.0);
+            wadi.setYPos(7.0);
+            wadi.setWidth(33.0);
+            wadi.setZIndex(2);
             albumRepository.save(wadi);
 
             List<AlbumPhoto> wadiPhotos = Arrays.asList(
@@ -201,6 +209,10 @@ public class DataSeeder implements CommandLineRunner {
             andes.setDescription("Jagged granite spires rising above glacial moraines. Traversing treacherous winds and unyielding terrain to capture the fleeting golden light across high altitude summits.");
             andes.setCoverImage("https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1200&q=85");
             andes.setDisplayOrder(3);
+            andes.setXPos(66.0);
+            andes.setYPos(3.0);
+            andes.setWidth(28.0);
+            andes.setZIndex(3);
             albumRepository.save(andes);
 
             List<AlbumPhoto> andesPhotos = Arrays.asList(
@@ -212,6 +224,35 @@ public class DataSeeder implements CommandLineRunner {
             albumPhotoRepository.saveAll(andesPhotos);
 
             System.out.println(">>> [DataSeeder] 3 Álbumes Dennis Wanderlight y 14 Fotos asociadas sembrados con éxito.");
+        }
+
+        // Si los álbumes ya existen pero no tienen coordenadas configuradas, asignarles las iniciales
+        List<Album> existingAlbums = albumRepository.findAll();
+        for (Album alb : existingAlbums) {
+            if (alb.getXPos() == null || alb.getYPos() == null || alb.getWidth() == null) {
+                if ("tokyo-neon-pulse".equals(alb.getId())) {
+                    alb.setXPos(4.0);
+                    alb.setYPos(2.0);
+                    alb.setWidth(28.0);
+                    alb.setZIndex(1);
+                } else if ("the-crimson-sands-of-wadi-rum".equals(alb.getId())) {
+                    alb.setXPos(35.0);
+                    alb.setYPos(7.0);
+                    alb.setWidth(33.0);
+                    alb.setZIndex(2);
+                } else if ("echoes-of-the-andean-peaks".equals(alb.getId())) {
+                    alb.setXPos(66.0);
+                    alb.setYPos(3.0);
+                    alb.setWidth(28.0);
+                    alb.setZIndex(3);
+                } else {
+                    alb.setXPos(10.0);
+                    alb.setYPos(10.0);
+                    alb.setWidth(28.0);
+                    alb.setZIndex(1);
+                }
+                albumRepository.save(alb);
+            }
         }
     }
 

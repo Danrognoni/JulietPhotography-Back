@@ -520,11 +520,70 @@ public class IntegrationEndpointsTest {
         // PUT con token ADMIN se actualiza exitosamente
         mockMvc.perform(put("/api/cover-photo")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .content(updateCoverJson))
+                .andExpect(status().isUnauthorized());
+
+        // PUT con token ADMIN se actualiza exitosamente
+        mockMvc.perform(put("/api/cover-photo")
+                        .contentType(MediaType.APPLICATION_JSON)
                         .content(updateCoverJson)
                         .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.imageUrl").value("https://example.com/nueva-portada.jpg"))
                 .andExpect(jsonPath("$.title").value("Portada Hero Test"));
+    }
+
+    @Test
+    @DisplayName("Lienzo Portfolio: PUT /api/albums/layout persiste coordenadas (xPos, yPos, width, zIndex) y GET /api/albums las devuelve")
+    void testUpdateAlbumsLayoutPersistence() throws Exception {
+        String layoutJson = """
+            [
+                {
+                    "id": "tokyo-neon-pulse",
+                    "xPos": 12.5,
+                    "yPos": 24.8,
+                    "width": 35.0,
+                    "zIndex": 5
+                },
+                {
+                    "id": "the-crimson-sands-of-wadi-rum",
+                    "xPos": 48.0,
+                    "yPos": 15.2,
+                    "width": 30.0,
+                    "zIndex": 6
+                }
+            ]
+        """;
+
+        // Sin token debe rechazar
+        mockMvc.perform(put("/api/albums/layout")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(layoutJson))
+                .andExpect(status().isUnauthorized());
+
+        // Con token ADMIN actualiza
+        mockMvc.perform(put("/api/albums/layout")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(layoutJson)
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isOk());
+
+        // Verificar que GET /api/albums devuelve las coordenadas actualizadas
+        mockMvc.perform(get("/api/albums"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[?(@.id == 'tokyo-neon-pulse')].xPos").value(12.5))
+                .andExpect(jsonPath("$[?(@.id == 'tokyo-neon-pulse')].yPos").value(24.8))
+                .andExpect(jsonPath("$[?(@.id == 'tokyo-neon-pulse')].width").value(35.0))
+                .andExpect(jsonPath("$[?(@.id == 'tokyo-neon-pulse')].zIndex").value(5))
+                .andExpect(jsonPath("$[?(@.id == 'the-crimson-sands-of-wadi-rum')].xPos").value(48.0))
+                .andExpect(jsonPath("$[?(@.id == 'the-crimson-sands-of-wadi-rum')].yPos").value(15.2));
+
+        // Verificar también que /api/admin/albums/layout funciona como endpoint alternativo
+        mockMvc.perform(put("/api/admin/albums/layout")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(layoutJson)
+                        .header("Authorization", "Bearer " + adminToken))
+                .andExpect(status().isOk());
     }
 }
 

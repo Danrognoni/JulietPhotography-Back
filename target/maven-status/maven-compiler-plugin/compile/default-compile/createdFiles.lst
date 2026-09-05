@@ -20,6 +20,7 @@ com\julietamarateo\photography\dto\PreferenceResponseDto.class
 com\julietamarateo\photography\repository\AlbumRepository.class
 com\julietamarateo\photography\exception\GlobalExceptionHandler.class
 com\julietamarateo\photography\dto\SiteContentDto.class
+com\julietamarateo\photography\dto\AlbumLayoutDto.class
 com\julietamarateo\photography\service\FileStorageService.class
 com\julietamarateo\photography\dto\PageResponse.class
 com\julietamarateo\photography\service\OrderService.class

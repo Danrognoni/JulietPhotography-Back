@@ -32,6 +32,18 @@ public class Album {
     @Column(name = "display_order")
     private Integer displayOrder = 0;
 
+    @Column(name = "x_pos")
+    private Double xPos;
+
+    @Column(name = "y_pos")
+    private Double yPos;
+
+    @Column(name = "width")
+    private Double width;
+
+    @Column(name = "z_index")
+    private Integer zIndex = 1;
+
     @OneToMany(mappedBy = "album", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @OrderBy("displayOrder ASC, createdAt ASC")
     private List<AlbumPhoto> photos = new ArrayList<>();
@@ -202,5 +214,53 @@ public class Album {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public Double getXPos() {
+        return xPos;
+    }
+
+    public void setXPos(Double xPos) {
+        this.xPos = xPos;
+    }
+
+    public Double getYPos() {
+        return yPos;
+    }
+
+    public void setYPos(Double yPos) {
+        this.yPos = yPos;
+    }
+
+    public Double getX() {
+        return xPos;
+    }
+
+    public void setX(Double x) {
+        this.xPos = x;
+    }
+
+    public Double getY() {
+        return yPos;
+    }
+
+    public void setY(Double y) {
+        this.yPos = y;
+    }
+
+    public Double getWidth() {
+        return width;
+    }
+
+    public void setWidth(Double width) {
+        this.width = width;
+    }
+
+    public Integer getZIndex() {
+        return zIndex;
+    }
+
+    public void setZIndex(Integer zIndex) {
+        this.zIndex = zIndex;
     }
 }

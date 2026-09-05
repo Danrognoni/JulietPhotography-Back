@@ -1,5 +1,7 @@
 package com.julietamarateo.photography.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.julietamarateo.photography.entity.AlbumPhoto;
 import java.time.LocalDateTime;
 
@@ -15,6 +17,8 @@ public class AlbumPhotoDto {
     private Double y;
     private Double width;
     private Double height;
+    @JsonProperty("zIndex")
+    @JsonAlias({"zIndex", "zindex", "z_index"})
     private Integer zIndex = 1;
     private LocalDateTime createdAt;
 
@@ -139,10 +143,12 @@ public class AlbumPhotoDto {
         this.height = height;
     }
 
+    @JsonProperty("zIndex")
     public Integer getZIndex() {
         return zIndex;
     }
 
+    @JsonProperty("zIndex")
     public void setZIndex(Integer zIndex) {
         this.zIndex = zIndex;
     }

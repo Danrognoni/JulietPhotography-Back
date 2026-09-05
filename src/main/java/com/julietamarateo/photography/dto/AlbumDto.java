@@ -1,5 +1,8 @@
 package com.julietamarateo.photography.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.julietamarateo.photography.entity.Album;
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
@@ -30,6 +33,21 @@ public class AlbumDto {
 
     private Integer order = 0;
 
+    @JsonProperty("xPos")
+    @JsonAlias({"x", "xPos", "xpos", "x_pos"})
+    private Double xPos;
+
+    @JsonProperty("yPos")
+    @JsonAlias({"y", "yPos", "ypos", "y_pos"})
+    private Double yPos;
+
+    @JsonProperty("width")
+    private Double width;
+
+    @JsonProperty("zIndex")
+    @JsonAlias({"zIndex", "zindex", "z_index"})
+    private Integer zIndex = 1;
+
     private List<AlbumPhotoDto> photos = new ArrayList<>();
 
     private List<String> photoUrls = new ArrayList<>();
@@ -56,6 +74,10 @@ public class AlbumDto {
         dto.setCoverImageUrl(entity.getCoverImage());
         dto.setDisplayOrder(entity.getDisplayOrder());
         dto.setOrder(entity.getDisplayOrder());
+        dto.setXPos(entity.getXPos());
+        dto.setYPos(entity.getYPos());
+        dto.setWidth(entity.getWidth());
+        dto.setZIndex(entity.getZIndex() != null ? entity.getZIndex() : 1);
         dto.setPhotoUrls(entity.getPhotoUrls() != null ? new ArrayList<>(entity.getPhotoUrls()) : new ArrayList<>());
 
         if (entity.getPhotos() != null) {
@@ -85,6 +107,10 @@ public class AlbumDto {
         entity.setCoverImage(finalCover);
         Integer finalOrder = this.order != null && this.order != 0 ? this.order : (this.displayOrder != null ? this.displayOrder : 0);
         entity.setDisplayOrder(finalOrder);
+        entity.setXPos(this.xPos);
+        entity.setYPos(this.yPos);
+        entity.setWidth(this.width);
+        entity.setZIndex(this.zIndex != null ? this.zIndex : 1);
         entity.setPhotoUrls(this.photoUrls != null ? new ArrayList<>(this.photoUrls) : new ArrayList<>());
         entity.setCreatedAt(this.createdAt != null ? this.createdAt : LocalDateTime.now());
         entity.setUpdatedAt(LocalDateTime.now());
@@ -115,6 +141,18 @@ public class AlbumDto {
         Integer finalOrder = this.order != null && this.order != 0 ? this.order : this.displayOrder;
         if (finalOrder != null) {
             entity.setDisplayOrder(finalOrder);
+        }
+        if (this.xPos != null) {
+            entity.setXPos(this.xPos);
+        }
+        if (this.yPos != null) {
+            entity.setYPos(this.yPos);
+        }
+        if (this.width != null) {
+            entity.setWidth(this.width);
+        }
+        if (this.zIndex != null) {
+            entity.setZIndex(this.zIndex);
         }
         if (this.photoUrls != null) {
             entity.setPhotoUrls(new ArrayList<>(this.photoUrls));
@@ -246,5 +284,63 @@ public class AlbumDto {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    @JsonProperty("xPos")
+    public Double getXPos() {
+        return xPos;
+    }
+
+    @JsonProperty("xPos")
+    public void setXPos(Double xPos) {
+        this.xPos = xPos;
+    }
+
+    @JsonProperty("yPos")
+    public Double getYPos() {
+        return yPos;
+    }
+
+    @JsonProperty("yPos")
+    public void setYPos(Double yPos) {
+        this.yPos = yPos;
+    }
+
+    @JsonIgnore
+    public Double getX() {
+        return xPos;
+    }
+
+    public void setX(Double x) {
+        this.xPos = x;
+    }
+
+    @JsonIgnore
+    public Double getY() {
+        return yPos;
+    }
+
+    public void setY(Double y) {
+        this.yPos = y;
+    }
+
+    @JsonProperty("width")
+    public Double getWidth() {
+        return width;
+    }
+
+    @JsonProperty("width")
+    public void setWidth(Double width) {
+        this.width = width;
+    }
+
+    @JsonProperty("zIndex")
+    public Integer getZIndex() {
+        return zIndex;
+    }
+
+    @JsonProperty("zIndex")
+    public void setZIndex(Integer zIndex) {
+        this.zIndex = zIndex;
     }
 }

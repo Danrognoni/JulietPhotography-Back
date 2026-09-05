@@ -1,6 +1,7 @@
 package com.julietamarateo.photography.service;
 
 import com.julietamarateo.photography.dto.AlbumDto;
+import com.julietamarateo.photography.dto.AlbumLayoutDto;
 import com.julietamarateo.photography.dto.AlbumPhotoDto;
 import com.julietamarateo.photography.dto.ReorderPhotosDto;
 import com.julietamarateo.photography.entity.Album;
@@ -253,6 +254,29 @@ public class AlbumService {
                     photo.setDisplayOrder(item.getOrder() != null ? item.getOrder() : 0);
                     albumPhotoRepository.save(photo);
                 });
+            }
+        }
+    }
+
+    @Transactional
+    @CacheEvict(value = {"albums"}, allEntries = true)
+    public void updateAlbumsLayout(List<AlbumLayoutDto> layouts) {
+        if (layouts == null || layouts.isEmpty()) return;
+
+        for (AlbumLayoutDto item : layouts) {
+            if (item.getId() == null) continue;
+
+            Album album = albumRepository.findById(item.getId())
+                    .or(() -> albumRepository.findByNameIgnoreCase(item.getId()))
+                    .orElse(null);
+
+            if (album != null) {
+                if (item.getXPos() != null) album.setXPos(item.getXPos());
+                if (item.getYPos() != null) album.setYPos(item.getYPos());
+                if (item.getWidth() != null) album.setWidth(item.getWidth());
+                if (item.getZIndex() != null) album.setZIndex(item.getZIndex());
+                album.setUpdatedAt(LocalDateTime.now());
+                albumRepository.save(album);
             }
         }
     }

@@ -1,6 +1,7 @@
 package com.julietamarateo.photography.controller;
 
 import com.julietamarateo.photography.dto.AlbumDto;
+import com.julietamarateo.photography.dto.AlbumLayoutDto;
 import com.julietamarateo.photography.dto.AlbumPhotoDto;
 import com.julietamarateo.photography.dto.ReorderPhotosDto;
 import com.julietamarateo.photography.service.AlbumService;
@@ -146,6 +147,17 @@ public class AlbumController {
             @PathVariable String id,
             @RequestBody ReorderPhotosDto dto) {
         albumService.reorderPhotos(id, dto);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * Endpoint protegido para actualizar las coordenadas, anchos y capas de los álbumes en el lienzo del Portfolio.
+     * PUT /api/albums/layout -> [{ id, xPos, yPos, width, zIndex }]
+     */
+    @PutMapping("/layout")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> updateAlbumsLayout(@RequestBody List<AlbumLayoutDto> layouts) {
+        albumService.updateAlbumsLayout(layouts);
         return ResponseEntity.ok().build();
     }
 }
