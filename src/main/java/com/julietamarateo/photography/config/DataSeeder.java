@@ -64,15 +64,17 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void seedAdminUser() {
-        String[] adminEmails = {"admin@denniswanderlight.com", "julietamarateo4@gmail.com"};
-        for (String email : adminEmails) {
-            if (!userRepository.existsByEmail(email)) {
-                User admin = new User();
-                admin.setEmail(email);
-                admin.setPassword(passwordEncoder.encode("12345678"));
-                admin.setRole("ROLE_ADMIN");
-                userRepository.save(admin);
-                System.out.println(">>> [DataSeeder] Administrador sembrado: " + email);
+        if (userRepository.count() == 0) {
+            String[] adminEmails = {"admin@denniswanderlight.com", "julietamarateo4@gmail.com"};
+            for (String email : adminEmails) {
+                if (!userRepository.existsByEmail(email)) {
+                    User admin = new User();
+                    admin.setEmail(email);
+                    admin.setPassword(passwordEncoder.encode("12345678"));
+                    admin.setRole("ROLE_ADMIN");
+                    userRepository.save(admin);
+                    System.out.println(">>> [DataSeeder] Administrador sembrado: " + email);
+                }
             }
         }
     }
@@ -123,7 +125,7 @@ public class DataSeeder implements CommandLineRunner {
             sc.setUpdatedAt(LocalDateTime.now());
 
             siteContentRepository.save(sc);
-            System.out.println(">>> [DataSeeder] SiteContent Dennis Wanderlight sembrado en SQLite.");
+            System.out.println(">>> [DataSeeder] SiteContent Dennis Wanderlight sembrado con éxito.");
         }
     }
 
@@ -141,17 +143,12 @@ public class DataSeeder implements CommandLineRunner {
                     Arrays.asList("Expeditions", "Tokyo Street", "Alpine Wilderness", "Editorial Print")
             );
             profileRepository.save(profile);
-            System.out.println(">>> [DataSeeder] Perfil inicial de Dennis Wanderlight sembrado en SQLite.");
+            System.out.println(">>> [DataSeeder] Perfil inicial de Dennis Wanderlight sembrado con éxito.");
         }
     }
 
     private void seedDefaultAlbums() {
-        if (albumPhotoRepository.count() == 0) {
-            // Limpiar si había álbumes antiguos sin fotos para sincronizar con la plantilla Wix Dennis Wanderlight
-            if (albumRepository.count() > 0 && albumPhotoRepository.count() == 0) {
-                albumRepository.deleteAll();
-            }
-
+        if (albumRepository.count() == 0) {
             // 1. Tokyo's Neon Pulse (Screenshot 1 & Screenshot 2)
             Album tokyo = new Album();
             tokyo.setId("tokyo-neon-pulse");
@@ -225,35 +222,6 @@ public class DataSeeder implements CommandLineRunner {
 
             System.out.println(">>> [DataSeeder] 3 Álbumes Dennis Wanderlight y 14 Fotos asociadas sembrados con éxito.");
         }
-
-        // Si los álbumes ya existen pero no tienen coordenadas configuradas, asignarles las iniciales
-        List<Album> existingAlbums = albumRepository.findAll();
-        for (Album alb : existingAlbums) {
-            if (alb.getXPos() == null || alb.getYPos() == null || alb.getWidth() == null) {
-                if ("tokyo-neon-pulse".equals(alb.getId())) {
-                    alb.setXPos(4.0);
-                    alb.setYPos(2.0);
-                    alb.setWidth(28.0);
-                    alb.setZIndex(1);
-                } else if ("the-crimson-sands-of-wadi-rum".equals(alb.getId())) {
-                    alb.setXPos(35.0);
-                    alb.setYPos(7.0);
-                    alb.setWidth(33.0);
-                    alb.setZIndex(2);
-                } else if ("echoes-of-the-andean-peaks".equals(alb.getId())) {
-                    alb.setXPos(66.0);
-                    alb.setYPos(3.0);
-                    alb.setWidth(28.0);
-                    alb.setZIndex(3);
-                } else {
-                    alb.setXPos(10.0);
-                    alb.setYPos(10.0);
-                    alb.setWidth(28.0);
-                    alb.setZIndex(1);
-                }
-                albumRepository.save(alb);
-            }
-        }
     }
 
     private void seedDefaultPhotos() {
@@ -325,7 +293,7 @@ public class DataSeeder implements CommandLineRunner {
             );
 
             photoRepository.saveAll(initialPhotos);
-            System.out.println(">>> [DataSeeder] 8 Fotografías de portafolio Dennis Wanderlight sembradas en SQLite.");
+            System.out.println(">>> [DataSeeder] 8 Fotografías de portafolio Dennis Wanderlight sembradas con éxito.");
         }
     }
 
@@ -339,7 +307,7 @@ public class DataSeeder implements CommandLineRunner {
                     "Journeys captured beyond the postcard view. High altitude alpine expedition."
             );
             coverPhotoRepository.save(defaultCover);
-            System.out.println(">>> [DataSeeder] Foto de portada Hero Dennis Wanderlight sembrada en SQLite.");
+            System.out.println(">>> [DataSeeder] Foto de portada Hero Dennis Wanderlight sembrada con éxito.");
         }
     }
 }

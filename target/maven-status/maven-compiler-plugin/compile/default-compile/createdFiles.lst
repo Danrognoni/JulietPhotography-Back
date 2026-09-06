@@ -57,7 +57,6 @@ com\julietamarateo\photography\config\JwtTokenProvider.class
 com\julietamarateo\photography\entity\Profile.class
 com\julietamarateo\photography\controller\AdminPhotoController.class
 com\julietamarateo\photography\repository\ServiceRepository.class
-com\julietamarateo\photography\config\DatabasePragmaInitializer.class
 com\julietamarateo\photography\dto\ContactMessageDto.class
 com\julietamarateo\photography\dto\CoverPhotoDto.class
 com\julietamarateo\photography\service\AlbumService.class
