@@ -42,18 +42,13 @@ public class FileStorageService {
             options.put("folder", subfolder);
         }
         options.put("resource_type", "auto");
+        // Optimizaciones automáticas Cloudinary
+        options.put("quality", "auto");
+        options.put("fetch_format", "auto");
 
-        byte[] fileBytes;
-        try {
-            fileBytes = file.getBytes();
-        } catch (IOException e) {
-            log.error("Error al leer los bytes del archivo para subida a Cloudinary", e);
-            throw new RuntimeException("Error al leer el archivo: " + e.getMessage(), e);
-        }
-
-        try {
+        try (var inputStream = file.getInputStream()) {
             Map<?, ?> uploadResult = cloudinary.uploader().upload(
-                    fileBytes,
+                    inputStream,
                     options.isEmpty() ? ObjectUtils.emptyMap() : options
             );
 
@@ -62,10 +57,17 @@ public class FileStorageService {
                 secureUrl = (String) uploadResult.get("url");
             }
 
-            log.info("Archivo subido a Cloudinary exitosamente: {}", secureUrl);
+            log.info("Archivo subido a Cloudinary exitosamente por stream en memoria: {}", secureUrl);
             return secureUrl;
         } catch (Exception e) {
-            log.error("Error al subir archivo a Cloudinary: {}", e.getMessage(), e);
+            log.error("Error al procesar o subir archivo a Cloudinary: {}", e.getMessage(), e);
+            String msg = e.getMessage() != null ? e.getMessage().toLowerCase() : "";
+            if (msg.contains("quota") || msg.contains("limit")) {
+                throw new RuntimeException("Límite de cuota en Cloudinary alcanzado. Por favor, libere espacio o contacte al administrador.", e);
+            }
+            if (msg.contains("file size") || msg.contains("too large")) {
+                throw new RuntimeException("El archivo excede el tamaño o dimensiones permitidas por el servidor multimedia.", e);
+            }
             throw new RuntimeException("Error al subir archivo a Cloudinary: " + e.getMessage(), e);
         }
     }
@@ -106,6 +108,23 @@ public class FileStorageService {
             return fileUrl + "_thumb.jpg";
         }
 
+        return fileUrl;
+    }
+
+    /**
+     * Retorna una URL con transformación de ancho máximo optimizada al vuelo para Cloudinary.
+     */
+    public String getOptimizedUrl(String fileUrl, int maxWidth) {
+        if (fileUrl == null || fileUrl.isBlank()) {
+            return fileUrl;
+        }
+        if (fileUrl.contains("cloudinary.com") && fileUrl.contains("/upload/")) {
+            String transform = "c_limit,w_" + maxWidth + ",q_auto,f_auto";
+            if (fileUrl.contains("/upload/" + transform + "/")) {
+                return fileUrl;
+            }
+            return fileUrl.replace("/upload/", "/upload/" + transform + "/");
+        }
         return fileUrl;
     }
 
