@@ -26,6 +26,9 @@ public class AuthService {
 
     public AuthResponse login(AuthRequest request) {
         String cleanEmail = request.getEmail().trim().toLowerCase();
+        if (!"julietamarateo4@gmail.com".equals(cleanEmail)) {
+            throw new BadCredentialsException("Credenciales inválidas");
+        }
         User user = userRepository.findByEmail(cleanEmail)
                 .orElseThrow(() -> new BadCredentialsException("Credenciales inválidas"));
 

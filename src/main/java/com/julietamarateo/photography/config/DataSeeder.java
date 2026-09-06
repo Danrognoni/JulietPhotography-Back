@@ -64,19 +64,21 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void seedAdminUser() {
-        if (userRepository.count() == 0) {
-            String[] adminEmails = {"admin@julietamarateo.com", "admin@denniswanderlight.com", "julietamarateo4@gmail.com"};
-            for (String email : adminEmails) {
-                if (!userRepository.existsByEmail(email)) {
-                    User admin = new User();
-                    admin.setEmail(email);
-                    admin.setPassword(passwordEncoder.encode("12345678"));
-                    admin.setRole("ROLE_ADMIN");
-                    userRepository.save(admin);
-                    System.out.println(">>> [DataSeeder] Administrador sembrado: " + email);
-                }
+        String targetEmail = "julietamarateo4@gmail.com";
+        // Eliminar cualquier usuario previo que no sea el autorizado
+        for (User u : userRepository.findAll()) {
+            if (!targetEmail.equalsIgnoreCase(u.getEmail())) {
+                userRepository.delete(u);
+                System.out.println(">>> [DataSeeder] Usuario no autorizado eliminado: " + u.getEmail());
             }
         }
+
+        User admin = userRepository.findByEmail(targetEmail).orElseGet(User::new);
+        admin.setEmail(targetEmail);
+        admin.setPassword(passwordEncoder.encode("12345678"));
+        admin.setRole("ROLE_ADMIN");
+        userRepository.save(admin);
+        System.out.println(">>> [DataSeeder] Administrador único configurado: " + targetEmail);
     }
 
     private void seedDefaultSiteContent() {
