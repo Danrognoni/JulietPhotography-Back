@@ -65,7 +65,7 @@ public class DataSeeder implements CommandLineRunner {
 
     private void seedAdminUser() {
         if (userRepository.count() == 0) {
-            String[] adminEmails = {"admin@denniswanderlight.com", "julietamarateo4@gmail.com"};
+            String[] adminEmails = {"admin@julietamarateo.com", "admin@denniswanderlight.com", "julietamarateo4@gmail.com"};
             for (String email : adminEmails) {
                 if (!userRepository.existsByEmail(email)) {
                     User admin = new User();
@@ -82,8 +82,8 @@ public class DataSeeder implements CommandLineRunner {
     private void seedDefaultSiteContent() {
         if (siteContentRepository.count() == 0) {
             SiteContent sc = new SiteContent();
-            sc.setBrandName("Dennis Wanderlight");
-            sc.setBrandTagline("Travel & Documentary");
+            sc.setBrandName("JulietaMarateo");
+            sc.setBrandTagline("Fotografía Profesional & Documental");
             sc.setHeroTitle("The World, Unfiltered");
             sc.setHeroSubtitle("Journeys captured beyond the postcard view");
             sc.setHeroButtonText("Explore Projects");
@@ -106,44 +106,44 @@ public class DataSeeder implements CommandLineRunner {
             sc.setStoryBgUrl("https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=2000&q=85");
             sc.setStoryPortraitUrl("https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=85");
 
-            sc.setAboutTitle("Dennis Wanderlight");
-            sc.setAboutSubtitle("Travel & Documentary Photographer");
-            sc.setAboutBio("Dennis Wanderlight is an independent travel and documentary photographer focused on capturing the raw, unscripted beauty of remote landscapes and human culture. From high alpine passes in the Andes to rainy twilight streets in Tokyo, Dennis seeks stories that exist beyond the conventional postcard perspective.");
+            sc.setAboutTitle("JulietaMarateo");
+            sc.setAboutSubtitle("Fotógrafa Profesional & Documental");
+            sc.setAboutBio("JulietaMarateo es una fotógrafa profesional enfocada en capturar momentos únicos, emociones reales e historias visuales con una perspectiva sensible y auténtica.");
             sc.setAboutQuote("Photography is not about documenting places; it's about holding on to the ephemeral light and silent narratives that define who we are.");
             sc.setAboutImageUrl("https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=85");
 
             sc.setContactTitle("Get in Touch");
             sc.setContactSubtitle("Available for worldwide expeditions, editorial assignments and fine art print commissions.");
-            sc.setContactEmail("hello@denniswanderlight.com");
+            sc.setContactEmail("contacto@julietamarateo.com");
             sc.setContactPhone("+1 (555) 349-2810");
             sc.setContactLocation("Tokyo · Patagonia · Worldwide");
-            sc.setInstagramHandle("@denniswanderlight");
+            sc.setInstagramHandle("@julietamarateo");
             sc.setWhatsappNumber("+15553492810");
 
             sc.setFooterText("Journeys captured beyond the postcard view. All images shot on location worldwide.");
-            sc.setCopyrightText("© 2026 Dennis Wanderlight. All rights reserved.");
+            sc.setCopyrightText("© 2026 JulietaMarateo. Todos los derechos reservados.");
             sc.setUpdatedAt(LocalDateTime.now());
 
             siteContentRepository.save(sc);
-            System.out.println(">>> [DataSeeder] SiteContent Dennis Wanderlight sembrado con éxito.");
+            System.out.println(">>> [DataSeeder] SiteContent JulietaMarateo sembrado con éxito.");
         }
     }
 
     private void seedDefaultProfile() {
         if (profileRepository.count() == 0) {
             Profile profile = new Profile(
-                    "Dennis Wanderlight",
-                    "Travel & Documentary Photographer",
+                    "JulietaMarateo",
+                    "Fotógrafa Profesional & Documental",
                     "Tokyo · Patagonia · Worldwide",
                     "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=85",
-                    "Dennis Wanderlight is an independent travel and documentary photographer focused on capturing the raw, unscripted beauty of remote landscapes and human culture. From high alpine passes in the Andes to rainy twilight streets in Tokyo, Dennis seeks stories that exist beyond the conventional postcard perspective.",
+                    "JulietaMarateo es una fotógrafa profesional enfocada en capturar momentos únicos, emociones reales e historias visuales con una perspectiva sensible y auténtica.",
                     "+15553492810",
-                    "hello@denniswanderlight.com",
-                    "@denniswanderlight",
+                    "contacto@julietamarateo.com",
+                    "@julietamarateo",
                     Arrays.asList("Expeditions", "Tokyo Street", "Alpine Wilderness", "Editorial Print")
             );
             profileRepository.save(profile);
-            System.out.println(">>> [DataSeeder] Perfil inicial de Dennis Wanderlight sembrado con éxito.");
+            System.out.println(">>> [DataSeeder] Perfil inicial de JulietaMarateo sembrado con éxito.");
         }
     }
 

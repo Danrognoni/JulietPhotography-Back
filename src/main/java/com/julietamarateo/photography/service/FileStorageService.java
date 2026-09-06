@@ -4,6 +4,7 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -13,6 +14,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class FileStorageService {
@@ -21,20 +23,56 @@ public class FileStorageService {
 
     private final Cloudinary cloudinary;
 
+    @Value("${app.upload.dir:uploads}")
+    private String uploadDir;
+
     public FileStorageService(Cloudinary cloudinary) {
         this.cloudinary = cloudinary;
     }
 
     /**
-     * Sube un archivo a Cloudinary y retorna su URL pública segura (secure_url).
+     * Verifica si las credenciales de Cloudinary están debidamente provistas sin lanzar NullPointerException.
+     */
+    public boolean isCloudinaryConfigured() {
+        if (cloudinary == null || cloudinary.config == null) {
+            return false;
+        }
+        String name = cloudinary.config.cloudName;
+        String key = cloudinary.config.apiKey;
+        String secret = cloudinary.config.apiSecret;
+        return name != null && !name.trim().isEmpty()
+                && key != null && !key.trim().isEmpty()
+                && secret != null && !secret.trim().isEmpty();
+    }
+
+    /**
+     * Sube un archivo a Cloudinary (o fallback en disco local) y retorna su URL pública segura.
      *
      * @param file      Archivo multipart subido.
-     * @param subfolder Carpeta de destino en Cloudinary (e.g. photos, profile, services, albums, site).
-     * @return URL pública segura HTTPS del recurso en Cloudinary.
+     * @param subfolder Carpeta de destino (e.g. photos, profile, services, albums, site).
+     * @return URL pública segura HTTPS del recurso.
      */
     public String storeFile(MultipartFile file, String subfolder) {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("No se puede almacenar un archivo vacío");
+        }
+
+        byte[] bytes;
+        try {
+            bytes = file.getBytes();
+        } catch (IOException e) {
+            log.error("Error al extraer bytes del archivo multipart: {}", e.getMessage(), e);
+            throw new IllegalArgumentException("No se pudo leer el archivo cargado: " + e.getMessage(), e);
+        }
+
+        if (bytes == null || bytes.length == 0) {
+            throw new IllegalArgumentException("El archivo cargado no contiene datos válidos");
+        }
+
+        // Si Cloudinary no está configurado (ej. entorno local sin credenciales), usar almacenamiento en disco local
+        if (!isCloudinaryConfigured()) {
+            log.warn("Cloudinary no está configurado (faltan credenciales). Almacenando archivo en disco local...");
+            return storeFileLocally(file, bytes, subfolder);
         }
 
         Map<String, Object> options = new HashMap<>();
@@ -46,9 +84,9 @@ public class FileStorageService {
         options.put("quality", "auto");
         options.put("fetch_format", "auto");
 
-        try (var inputStream = file.getInputStream()) {
+        try {
             Map<?, ?> uploadResult = cloudinary.uploader().upload(
-                    inputStream,
+                    bytes,
                     options.isEmpty() ? ObjectUtils.emptyMap() : options
             );
 
@@ -57,7 +95,7 @@ public class FileStorageService {
                 secureUrl = (String) uploadResult.get("url");
             }
 
-            log.info("Archivo subido a Cloudinary exitosamente por stream en memoria: {}", secureUrl);
+            log.info("Archivo subido a Cloudinary exitosamente: {}", secureUrl);
             return secureUrl;
         } catch (Exception e) {
             log.error("Error al procesar o subir archivo a Cloudinary: {}", e.getMessage(), e);
@@ -68,7 +106,40 @@ public class FileStorageService {
             if (msg.contains("file size") || msg.contains("too large")) {
                 throw new RuntimeException("El archivo excede el tamaño o dimensiones permitidas por el servidor multimedia.", e);
             }
+            if (msg.contains("must supply") || msg.contains("cloud_name") || msg.contains("api_key") || msg.contains("api_secret") || msg.contains("credentials")) {
+                throw new RuntimeException("Credenciales de Cloudinary incompletas o inválidas: " + e.getMessage(), e);
+            }
             throw new RuntimeException("Error al subir archivo a Cloudinary: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Almacena el archivo en el sistema de archivos local cuando Cloudinary no está disponible.
+     */
+    public String storeFileLocally(MultipartFile file, byte[] bytes, String subfolder) {
+        try {
+            String folder = uploadDir != null && !uploadDir.isBlank() ? uploadDir : "uploads";
+            if (subfolder != null && !subfolder.isBlank()) {
+                folder = folder + "/" + subfolder;
+            }
+            Path targetDir = Paths.get(folder).toAbsolutePath().normalize();
+            Files.createDirectories(targetDir);
+
+            String orig = file.getOriginalFilename();
+            String ext = ".jpg";
+            if (orig != null && orig.contains(".")) {
+                ext = orig.substring(orig.lastIndexOf('.'));
+            }
+            String fileName = UUID.randomUUID().toString() + ext;
+            Path dest = targetDir.resolve(fileName);
+            Files.write(dest, bytes);
+
+            String relativeUrl = "/" + folder.replace('\\', '/') + "/" + fileName;
+            log.info("Archivo almacenado exitosamente en disco local: {}", relativeUrl);
+            return relativeUrl;
+        } catch (IOException ex) {
+            log.error("Error al persistir archivo en almacenamiento local: {}", ex.getMessage(), ex);
+            throw new RuntimeException("Error al almacenar archivo en disco: " + ex.getMessage(), ex);
         }
     }
 

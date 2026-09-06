@@ -57,7 +57,7 @@ public class GlobalExceptionHandler {
         body.put("timestamp", LocalDateTime.now());
         body.put("status", HttpStatus.PAYLOAD_TOO_LARGE.value());
         body.put("error", "Archivo Demasiado Grande");
-        body.put("message", "El archivo excede el tamaño máximo permitido (25MB). Utilice la compresión automática en cliente.");
+        body.put("message", "El archivo excede el tamaño máximo permitido (15MB). Utilice la compresión automática en cliente.");
         return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(body);
     }
 
@@ -69,6 +69,20 @@ public class GlobalExceptionHandler {
         body.put("error", "Parámetro Inválido");
         body.put("message", ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, Object>> handleRuntimeException(RuntimeException ex) {
+        String msg = ex.getMessage() != null ? ex.getMessage() : "";
+        if (msg.contains("Cloudinary") || msg.contains("almacenar") || msg.contains("almacenamiento") || msg.contains("archivo")) {
+            Map<String, Object> body = new HashMap<>();
+            body.put("timestamp", LocalDateTime.now());
+            body.put("status", HttpStatus.BAD_GATEWAY.value());
+            body.put("error", "Error de Almacenamiento Multimedia");
+            body.put("message", msg);
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(body);
+        }
+        return handleGenericException(ex);
     }
 
     @ExceptionHandler(Exception.class)
