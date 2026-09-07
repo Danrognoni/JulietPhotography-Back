@@ -47,13 +47,12 @@ public class IntegrationEndpointsTest {
     @Autowired
     private ProfileRepository profileRepository;
 
-    @Autowired
-    private org.springframework.mail.javamail.JavaMailSender mailSender;
-
     private String adminToken;
 
     @TestConfiguration
     static class MockStorageConfig {
+        static boolean simulateBrevoFailure = false;
+
         @Bean
         @Primary
         public FileStorageService testFileStorageService() {
@@ -84,13 +83,26 @@ public class IntegrationEndpointsTest {
 
         @Bean
         @Primary
-        public org.springframework.mail.javamail.JavaMailSender testMailSender() {
-            return org.mockito.Mockito.mock(org.springframework.mail.javamail.JavaMailSender.class);
+        public org.springframework.web.client.RestClient.Builder testRestClientBuilder() {
+            return org.springframework.web.client.RestClient.builder()
+                    .requestInterceptor((request, body, execution) -> {
+                        if (simulateBrevoFailure) {
+                            return new org.springframework.mock.http.client.MockClientHttpResponse(
+                                    "{\"code\":\"unauthorized\",\"message\":\"Key not found\"}".getBytes(java.nio.charset.StandardCharsets.UTF_8),
+                                    org.springframework.http.HttpStatus.UNAUTHORIZED
+                            );
+                        }
+                        return new org.springframework.mock.http.client.MockClientHttpResponse(
+                                "{\"messageId\":\"<mock-brevo-id@brevo>\"}".getBytes(java.nio.charset.StandardCharsets.UTF_8),
+                                org.springframework.http.HttpStatus.CREATED
+                        );
+                    });
         }
     }
 
     @BeforeEach
     void setUp() throws Exception {
+        MockStorageConfig.simulateBrevoFailure = false;
         adminToken = jwtTokenProvider.generateToken("julietamarateo4@gmail.com", "ROLE_ADMIN");
 
         profileRepository.findTopByOrderByIdAsc().ifPresent(prof -> {
@@ -212,7 +224,7 @@ public class IntegrationEndpointsTest {
         mockMvc.perform(post("/api/contact")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(contactJson))
-                .andExpect(status().isCreated())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true));
 
         // GET sin auth debe rechazar
@@ -227,10 +239,9 @@ public class IntegrationEndpointsTest {
     }
 
     @Test
-    @DisplayName("Contacto: Si falla el envío de correo por SMTP, debe retornar 500 y no 200/201")
+    @DisplayName("Contacto: Si falla el envío de correo por API de Brevo, debe retornar 500 y no 200")
     void testContactSubmissionFailureReturns500() throws Exception {
-        Mockito.doThrow(new org.springframework.mail.MailSendException("Simulated SMTP error"))
-                .when(mailSender).send(Mockito.any(org.springframework.mail.SimpleMailMessage.class));
+        MockStorageConfig.simulateBrevoFailure = true;
 
         try {
             String contactJson = """
@@ -238,7 +249,7 @@ public class IntegrationEndpointsTest {
                         "name": "Error Tester",
                         "email": "errortest@example.com",
                         "subject": "Fallo de Correo",
-                        "message": "Probando que el servidor devuelva HTTP 500 ante error de SMTP"
+                        "message": "Probando que el servidor devuelva HTTP 500 ante error de API de Brevo"
                     }
                     """;
 
@@ -249,7 +260,7 @@ public class IntegrationEndpointsTest {
                     .andExpect(jsonPath("$.success").value(false))
                     .andExpect(jsonPath("$.error").exists());
         } finally {
-            Mockito.doNothing().when(mailSender).send(Mockito.any(org.springframework.mail.SimpleMailMessage.class));
+            MockStorageConfig.simulateBrevoFailure = false;
         }
     }
 

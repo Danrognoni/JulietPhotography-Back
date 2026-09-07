@@ -6,14 +6,17 @@ import com.julietamarateo.photography.repository.ContactMessageRepository;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.util.HtmlUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -24,17 +27,26 @@ public class ContactMessageController {
     private static final Logger log = LoggerFactory.getLogger(ContactMessageController.class);
 
     private final ContactMessageRepository contactMessageRepository;
-    private final JavaMailSender mailSender;
+    private final RestClient restClient;
 
-    @Value("${spring.mail.username:}")
-    private String mailFrom;
+    @Value("${brevo.api.key:}")
+    private String brevoApiKey;
+
+    @Value("${brevo.api.url:https://api.brevo.com/v3/smtp/email}")
+    private String brevoApiUrl;
 
     @Value("${app.mail.to:julietamarateo4@gmail.com}")
     private String mailTo;
 
-    public ContactMessageController(ContactMessageRepository contactMessageRepository, JavaMailSender mailSender) {
+    public ContactMessageController(ContactMessageRepository contactMessageRepository) {
+        this(contactMessageRepository, RestClient.builder());
+    }
+
+    @Autowired
+    public ContactMessageController(ContactMessageRepository contactMessageRepository,
+                                    @Autowired(required = false) RestClient.Builder restClientBuilder) {
         this.contactMessageRepository = contactMessageRepository;
-        this.mailSender = mailSender;
+        this.restClient = (restClientBuilder != null) ? restClientBuilder.build() : RestClient.create();
     }
 
     /**
@@ -53,46 +65,63 @@ public class ContactMessageController {
         ContactMessage saved = contactMessageRepository.save(message);
 
         try {
-            SimpleMailMessage mail = new SimpleMailMessage();
-            String from = (mailFrom != null && !mailFrom.isBlank()) ? mailFrom : dto.getEmail();
-            mail.setFrom(from);
-            mail.setReplyTo(dto.getEmail());
-            mail.setTo(mailTo);
+            String destinationEmail = (mailTo != null && !mailTo.isBlank()) ? mailTo : "julietamarateo4@gmail.com";
 
-            String subject = (dto.getSubject() != null && !dto.getSubject().isBlank())
-                    ? "Nuevo mensaje de contacto: " + dto.getSubject()
-                    : "Nuevo mensaje de contacto desde Portfolio";
-            mail.setSubject(subject);
+            String safeName = HtmlUtils.htmlEscape(dto.getName() != null ? dto.getName() : "");
+            String safeEmail = HtmlUtils.htmlEscape(dto.getEmail() != null ? dto.getEmail() : "");
+            String safeMessage = HtmlUtils.htmlEscape(dto.getMessage() != null ? dto.getMessage() : "")
+                    .replace("\r\n", "<br>")
+                    .replace("\n", "<br>");
 
-            String body = String.format(
-                    "Has recibido un nuevo mensaje desde el formulario de contacto de tu portfolio web:\n\n" +
-                    "Nombre: %s\n" +
-                    "Email: %s\n" +
-                    "Asunto: %s\n\n" +
-                    "Mensaje:\n%s\n\n" +
-                    "---\nEste mensaje fue registrado en el panel administrativo con ID #%d.",
-                    dto.getName(),
-                    dto.getEmail(),
-                    dto.getSubject() != null ? dto.getSubject() : "Sin asunto",
-                    dto.getMessage(),
-                    saved.getId()
+            String htmlContent = String.format(
+                    "<p><strong>Nombre:</strong> %s</p><p><strong>Email:</strong> %s</p><p><strong>Mensaje:</strong><br>%s</p>",
+                    safeName,
+                    safeEmail,
+                    safeMessage
             );
-            mail.setText(body);
 
-            mailSender.send(mail);
-            log.info("Email de contacto despachado exitosamente a {} para el mensaje ID #{}", mailTo, saved.getId());
+            Map<String, Object> brevoPayload = Map.of(
+                    "sender", Map.of("name", "Portfolio Contacto", "email", destinationEmail),
+                    "to", List.of(Map.of("email", destinationEmail)),
+                    "replyTo", Map.of(
+                            "email", dto.getEmail() != null ? dto.getEmail() : "",
+                            "name", dto.getName() != null ? dto.getName() : ""
+                    ),
+                    "subject", "Nuevo mensaje de contacto en el Portfolio",
+                    "htmlContent", htmlContent
+            );
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
-                    "success", true,
-                    "message", "Mensaje enviado exitosamente",
-                    "id", saved.getId()
-            ));
+            return restClient.post()
+                    .uri(brevoApiUrl)
+                    .header("api-key", brevoApiKey != null ? brevoApiKey : "")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(brevoPayload)
+                    .exchange((request, response) -> {
+                        int statusCode = response.getStatusCode().value();
+                        String responseBody = new String(response.getBody().readAllBytes(), StandardCharsets.UTF_8);
+
+                        if (statusCode == 201) {
+                            log.info("Email de contacto despachado exitosamente mediante Brevo API para el mensaje ID #{}", saved.getId());
+                            return ResponseEntity.ok(Map.of(
+                                    "success", true,
+                                    "message", "Mensaje enviado exitosamente",
+                                    "id", saved.getId()
+                            ));
+                        } else {
+                            log.error("Fallo en la API de Brevo al enviar email de contacto. Status: {}, Respuesta: {}", statusCode, responseBody);
+                            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+                                    "success", false,
+                                    "message", "Hubo un error al enviar el mensaje. Por favor, intenta de nuevo o comunícate por redes/WhatsApp.",
+                                    "error", responseBody.isBlank() ? ("Status code: " + statusCode) : responseBody
+                            ));
+                        }
+                    });
         } catch (Exception ex) {
-            log.error("Error crítico al enviar email de contacto a través de SMTP: {}", ex.getMessage(), ex);
+            log.error("Error crítico al enviar email de contacto mediante API de Brevo: {}", ex.getMessage(), ex);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
                     "success", false,
                     "message", "Hubo un error al enviar el mensaje. Por favor, intenta de nuevo o comunícate por redes/WhatsApp.",
-                    "error", ex.getMessage() != null ? ex.getMessage() : "Error desconocido al despachar correo SMTP"
+                    "error", ex.getMessage() != null ? ex.getMessage() : "Error desconocido al despachar correo vía Brevo API"
             ));
         }
     }
