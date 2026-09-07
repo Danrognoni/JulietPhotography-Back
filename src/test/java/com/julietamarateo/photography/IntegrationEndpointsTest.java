@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import org.mockito.Mockito;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
@@ -45,6 +46,9 @@ public class IntegrationEndpointsTest {
 
     @Autowired
     private ProfileRepository profileRepository;
+
+    @Autowired
+    private org.springframework.mail.javamail.JavaMailSender mailSender;
 
     private String adminToken;
 
@@ -76,6 +80,12 @@ public class IntegrationEndpointsTest {
                     return true;
                 }
             };
+        }
+
+        @Bean
+        @Primary
+        public org.springframework.mail.javamail.JavaMailSender testMailSender() {
+            return org.mockito.Mockito.mock(org.springframework.mail.javamail.JavaMailSender.class);
         }
     }
 
@@ -214,6 +224,33 @@ public class IntegrationEndpointsTest {
                         .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
+    }
+
+    @Test
+    @DisplayName("Contacto: Si falla el envío de correo por SMTP, debe retornar 500 y no 200/201")
+    void testContactSubmissionFailureReturns500() throws Exception {
+        Mockito.doThrow(new org.springframework.mail.MailSendException("Simulated SMTP error"))
+                .when(mailSender).send(Mockito.any(org.springframework.mail.SimpleMailMessage.class));
+
+        try {
+            String contactJson = """
+                    {
+                        "name": "Error Tester",
+                        "email": "errortest@example.com",
+                        "subject": "Fallo de Correo",
+                        "message": "Probando que el servidor devuelva HTTP 500 ante error de SMTP"
+                    }
+                    """;
+
+            mockMvc.perform(post("/api/contact")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(contactJson))
+                    .andExpect(status().isInternalServerError())
+                    .andExpect(jsonPath("$.success").value(false))
+                    .andExpect(jsonPath("$.error").exists());
+        } finally {
+            Mockito.doNothing().when(mailSender).send(Mockito.any(org.springframework.mail.SimpleMailMessage.class));
+        }
     }
 
     @Test
