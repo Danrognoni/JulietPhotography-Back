@@ -84,17 +84,17 @@ public class DataSeeder implements CommandLineRunner {
     private void seedDefaultSiteContent() {
         if (siteContentRepository.count() == 0) {
             SiteContent sc = new SiteContent();
-            sc.setBrandName("JulietaMarateo");
-            sc.setBrandTagline("Fotografía Profesional & Documental");
-            sc.setHeroTitle("The World, Unfiltered");
-            sc.setHeroSubtitle("Journeys captured beyond the postcard view");
-            sc.setHeroButtonText("Explore Projects");
-            sc.setHeroBgUrl("https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=2000&q=85");
+            sc.setBrandName("Julieta Marateo");
+            sc.setBrandTagline("Fotógrafa");
+            sc.setHeroTitle("Naturaleza sin filtro");
+            sc.setHeroSubtitle("Registros vívidos");
+            sc.setHeroButtonText("Explorar proyectos");
+            sc.setHeroBgUrl("https://res.cloudinary.com/xsfcv0a8/image/upload/v1788658367/site/ryibo8ddjsca8zpfdb59.jpg");
 
-            sc.setMenuHome("Home");
+            sc.setMenuHome("Inicio");
             sc.setMenuPortfolio("Portfolio");
-            sc.setMenuAbout("About");
-            sc.setMenuContact("Contact");
+            sc.setMenuAbout("Sobre mí");
+            sc.setMenuContact("Contacto");
 
             sc.setVignettesKicker("Vignettes from the edge");
             sc.setVignettesTitle("A curated selection of recent expeditions and untold stories");
@@ -102,50 +102,50 @@ public class DataSeeder implements CommandLineRunner {
             sc.setVignettesImage1("https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=1200&q=85");
             sc.setVignettesImage2("https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=1200&q=85");
 
-            sc.setStoryKickerLeft("Beyond the frame");
-            sc.setStoryKickerRight("Stories in motion");
-            sc.setStoryButtonText("My Story");
-            sc.setStoryBgUrl("https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=2000&q=85");
-            sc.setStoryPortraitUrl("https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=85");
+            sc.setStoryKickerLeft("Detrás del lente");
+            sc.setStoryKickerRight("Detrás del lente");
+            sc.setStoryButtonText("Sobre mí");
+            sc.setStoryBgUrl("https://res.cloudinary.com/xsfcv0a8/image/upload/v1788656197/site/lobtvkppkun6meckqaxn.jpg");
+            sc.setStoryPortraitUrl("https://res.cloudinary.com/xsfcv0a8/image/upload/v1788656154/site/lvocwcaiykaddo0byyjj.jpg");
 
-            sc.setAboutTitle("JulietaMarateo");
-            sc.setAboutSubtitle("Fotógrafa Profesional & Documental");
-            sc.setAboutBio("JulietaMarateo es una fotógrafa profesional enfocada en capturar momentos únicos, emociones reales e historias visuales con una perspectiva sensible y auténtica.");
-            sc.setAboutQuote("Photography is not about documenting places; it's about holding on to the ephemeral light and silent narratives that define who we are.");
-            sc.setAboutImageUrl("https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=85");
+            sc.setAboutTitle("Julieta Marateo");
+            sc.setAboutSubtitle("Técnica en fotografía");
+            sc.setAboutBio("Trabajo como fotógrafa independiente, y como tal, me encargo tanto del registro fotográfico, como de su postproducción. Soy una aficionada del arte, y me interesa variar en los recursos estéticos y técnicos que utilizo, aportándoles un dinamismo y una frescura diferente a cada uno de mis proyectos.");
+            sc.setAboutQuote("Todavía no estoy inspirada");
+            sc.setAboutImageUrl("https://res.cloudinary.com/xsfcv0a8/image/upload/v1788737011/site/ah992tuac0awzfyo7db5.jpg");
 
-            sc.setContactTitle("Get in Touch");
-            sc.setContactSubtitle("Available for worldwide expeditions, editorial assignments and fine art print commissions.");
-            sc.setContactEmail("contacto@julietamarateo.com");
-            sc.setContactPhone("+1 (555) 349-2810");
-            sc.setContactLocation("Tokyo · Patagonia · Worldwide");
-            sc.setInstagramHandle("@julietamarateo");
-            sc.setWhatsappNumber("+15553492810");
+            sc.setContactTitle("¡Contactate conmigo!");
+            sc.setContactSubtitle("¡Si tenés una idea en mente, no dudes en comunicarte conmigo! Estoy a tu disposición para crear un proyecto junta/os.");
+            sc.setContactEmail("julietamarateo4@gmail.com");
+            sc.setContactPhone("+54 2281 311917");
+            sc.setContactLocation("Mar del Plata, Argentina.");
+            sc.setInstagramHandle("@julietamph_");
+            sc.setWhatsappNumber("+54 2281 311917");
 
             sc.setFooterText("Journeys captured beyond the postcard view. All images shot on location worldwide.");
-            sc.setCopyrightText("© 2026 JulietaMarateo. Todos los derechos reservados.");
+            sc.setCopyrightText("© 2026 Julieta Marateo. All rights reserved.");
             sc.setUpdatedAt(LocalDateTime.now());
 
             siteContentRepository.save(sc);
-            System.out.println(">>> [DataSeeder] SiteContent JulietaMarateo sembrado con éxito.");
+            System.out.println(">>> [DataSeeder] SiteContent Julieta Marateo sembrado con éxito.");
         }
     }
 
     private void seedDefaultProfile() {
         if (profileRepository.count() == 0) {
             Profile profile = new Profile(
-                    "JulietaMarateo",
-                    "Fotógrafa Profesional & Documental",
-                    "Tokyo · Patagonia · Worldwide",
-                    "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=85",
-                    "JulietaMarateo es una fotógrafa profesional enfocada en capturar momentos únicos, emociones reales e historias visuales con una perspectiva sensible y auténtica.",
-                    "+15553492810",
-                    "contacto@julietamarateo.com",
-                    "@julietamarateo",
+                    "Julieta Marateo",
+                    "Técnica en fotografía",
+                    "Mar del Plata, Argentina.",
+                    "https://res.cloudinary.com/xsfcv0a8/image/upload/v1788737011/site/ah992tuac0awzfyo7db5.jpg",
+                    "Trabajo como fotógrafa independiente, y como tal, me encargo tanto del registro fotográfico, como de su postproducción. Soy una aficionada del arte, y me interesa variar en los recursos estéticos y técnicos que utilizo, aportándoles un dinamismo y una frescura diferente a cada uno de mis proyectos.",
+                    "+54 2281 311917",
+                    "julietamarateo4@gmail.com",
+                    "@julietamph_",
                     Arrays.asList("Expeditions", "Tokyo Street", "Alpine Wilderness", "Editorial Print")
             );
             profileRepository.save(profile);
-            System.out.println(">>> [DataSeeder] Perfil inicial de JulietaMarateo sembrado con éxito.");
+            System.out.println(">>> [DataSeeder] Perfil inicial de Julieta Marateo sembrado con éxito.");
         }
     }
 
