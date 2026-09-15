@@ -13,11 +13,16 @@ import java.util.Map;
  * No requiere token JWT ni autenticación y responde de inmediato con HTTP 200 OK.
  */
 @RestController
-@CrossOrigin(origins = "*")
+@CrossOrigin(originPatterns = "*")
 public class PingController {
 
-    @GetMapping(value = {"/ping", "/api/ping"}, produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE})
+    @GetMapping(value = {"/ping", "/api/ping"}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, String>> ping() {
         return ResponseEntity.ok(Map.of("status", "UP", "message", "pong"));
+    }
+
+    @GetMapping(value = {"/ping", "/api/ping"}, produces = MediaType.TEXT_PLAIN_VALUE)
+    public ResponseEntity<String> pingText() {
+        return ResponseEntity.ok("pong");
     }
 }

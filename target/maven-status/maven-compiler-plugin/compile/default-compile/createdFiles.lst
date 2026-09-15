@@ -40,6 +40,7 @@ com\julietamarateo\photography\repository\PaymentRecordRepository.class
 com\julietamarateo\photography\repository\ContactMessageRepository.class
 com\julietamarateo\photography\service\PhotoService.class
 com\julietamarateo\photography\controller\MercadoPagoController.class
+com\julietamarateo\photography\controller\PingController.class
 com\julietamarateo\photography\JulietPhotographyApplication.class
 com\julietamarateo\photography\service\SiteContentService.class
 com\julietamarateo\photography\controller\OrderController.class
