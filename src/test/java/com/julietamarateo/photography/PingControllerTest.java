@@ -15,6 +15,7 @@ import org.springframework.web.filter.CorsFilter;
 import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.head;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -59,6 +60,20 @@ public class PingControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("UP"))
                 .andExpect(jsonPath("$.message").value("pong"));
+    }
+
+    @Test
+    @DisplayName("HEAD /ping should return 200 OK without body (e.g. UptimeRobot)")
+    void testHeadPingEndpoint() throws Exception {
+        mockMvcWithFilter.perform(head("/ping"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("HEAD /api/ping should return 200 OK without body")
+    void testHeadApiPingEndpoint() throws Exception {
+        mockMvcWithFilter.perform(head("/api/ping"))
+                .andExpect(status().isOk());
     }
 
     @Test

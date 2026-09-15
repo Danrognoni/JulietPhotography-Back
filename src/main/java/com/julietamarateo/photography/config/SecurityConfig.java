@@ -65,7 +65,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 
                 // Endpoint liviano de keep-alive / health checks para Render y UptimeRobot
-                .requestMatchers(HttpMethod.GET, "/health", "/api/health", "/ping", "/api/ping").permitAll()
+                .requestMatchers("/health", "/api/health", "/ping", "/api/ping").permitAll()
                 
                 // Endpoints públicos de lectura y autenticación (con y sin prefijo /api)
                 .requestMatchers(HttpMethod.POST, "/api/auth/**", "/auth/**").permitAll()
