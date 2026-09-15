@@ -64,8 +64,8 @@ public class SecurityConfig {
                 // Peticiones de preflight CORS siempre permitidas
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 
-                // Endpoint liviano de keep-alive / health checks para Render
-                .requestMatchers(HttpMethod.GET, "/health", "/api/health").permitAll()
+                // Endpoint liviano de keep-alive / health checks para Render y UptimeRobot
+                .requestMatchers(HttpMethod.GET, "/health", "/api/health", "/ping", "/api/ping").permitAll()
                 
                 // Endpoints públicos de lectura y autenticación (con y sin prefijo /api)
                 .requestMatchers(HttpMethod.POST, "/api/auth/**", "/auth/**").permitAll()

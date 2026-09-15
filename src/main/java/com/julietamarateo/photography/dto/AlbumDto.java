@@ -55,6 +55,10 @@ public class AlbumDto {
     @JsonAlias({"zIndex", "zindex", "z_index"})
     private Integer zIndex = 1;
 
+    @JsonProperty("backgroundColor")
+    @JsonAlias({"backgroundColor", "background_color", "bgColor", "bg_color"})
+    private String backgroundColor;
+
     private List<AlbumPhotoDto> photos = new ArrayList<>();
 
     private List<String> photoUrls = new ArrayList<>();
@@ -87,6 +91,7 @@ public class AlbumDto {
         dto.setHeight(entity.getHeight());
         dto.setRotation(entity.getRotation() != null ? entity.getRotation() : 0.0);
         dto.setZIndex(entity.getZIndex() != null ? entity.getZIndex() : 1);
+        dto.setBackgroundColor(entity.getBackgroundColor());
         dto.setPhotoUrls(entity.getPhotoUrls() != null ? new ArrayList<>(entity.getPhotoUrls()) : new ArrayList<>());
 
         if (entity.getPhotos() != null) {
@@ -122,6 +127,7 @@ public class AlbumDto {
         entity.setHeight(this.height);
         entity.setRotation(this.rotation != null ? this.rotation : 0.0);
         entity.setZIndex(this.zIndex != null ? this.zIndex : 1);
+        entity.setBackgroundColor(this.backgroundColor != null ? this.backgroundColor.trim() : null);
         entity.setPhotoUrls(this.photoUrls != null ? new ArrayList<>(this.photoUrls) : new ArrayList<>());
         entity.setCreatedAt(this.createdAt != null ? this.createdAt : LocalDateTime.now());
         entity.setUpdatedAt(LocalDateTime.now());
@@ -170,6 +176,9 @@ public class AlbumDto {
         }
         if (this.zIndex != null) {
             entity.setZIndex(this.zIndex);
+        }
+        if (this.backgroundColor != null) {
+            entity.setBackgroundColor(this.backgroundColor.trim());
         }
         if (this.photoUrls != null) {
             entity.setPhotoUrls(new ArrayList<>(this.photoUrls));
@@ -379,5 +388,15 @@ public class AlbumDto {
     @JsonProperty("rotation")
     public void setRotation(Double rotation) {
         this.rotation = rotation != null ? rotation : 0.0;
+    }
+
+    @JsonProperty("backgroundColor")
+    public String getBackgroundColor() {
+        return backgroundColor;
+    }
+
+    @JsonProperty("backgroundColor")
+    public void setBackgroundColor(String backgroundColor) {
+        this.backgroundColor = backgroundColor;
     }
 }

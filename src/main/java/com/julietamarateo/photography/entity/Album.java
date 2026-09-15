@@ -50,6 +50,9 @@ public class Album {
     @Column(name = "z_index")
     private Integer zIndex = 1;
 
+    @Column(name = "background_color", length = 32)
+    private String backgroundColor;
+
     @OneToMany(mappedBy = "album", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @OrderBy("displayOrder ASC, createdAt ASC")
     private List<AlbumPhoto> photos = new ArrayList<>();
@@ -284,5 +287,13 @@ public class Album {
 
     public void setRotation(Double rotation) {
         this.rotation = rotation != null ? rotation : 0.0;
+    }
+
+    public String getBackgroundColor() {
+        return backgroundColor;
+    }
+
+    public void setBackgroundColor(String backgroundColor) {
+        this.backgroundColor = backgroundColor;
     }
 }

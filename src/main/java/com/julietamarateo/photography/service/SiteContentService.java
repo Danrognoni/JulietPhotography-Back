@@ -145,6 +145,9 @@ public class SiteContentService {
 
         sc.setFooterText("Journeys captured beyond the postcard view. All images shot on location worldwide.");
         sc.setCopyrightText("© 2026 JulietaMarateo. Todos los derechos reservados.");
+        sc.setPortfolioTitle("PORTFOLIO & EXPEDICIONES");
+        sc.setPortfolioBgColor("#edf3f8");
+        sc.setGlobalFont("Playfair Display");
         sc.setUpdatedAt(LocalDateTime.now());
 
         return siteContentRepository.save(sc);

@@ -81,6 +81,15 @@ public class SiteContent {
 
     private String copyrightText;
 
+    @Column(columnDefinition = "TEXT")
+    private String portfolioTitle;
+
+    @Column(name = "portfolio_bg_color", length = 32)
+    private String portfolioBgColor;
+
+    @Column(name = "global_font", length = 64)
+    private String globalFont;
+
     private LocalDateTime updatedAt = LocalDateTime.now();
 
     public SiteContent() {
@@ -364,6 +373,30 @@ public class SiteContent {
 
     public void setCopyrightText(String copyrightText) {
         this.copyrightText = copyrightText;
+    }
+
+    public String getPortfolioTitle() {
+        return portfolioTitle;
+    }
+
+    public void setPortfolioTitle(String portfolioTitle) {
+        this.portfolioTitle = portfolioTitle;
+    }
+
+    public String getPortfolioBgColor() {
+        return portfolioBgColor;
+    }
+
+    public void setPortfolioBgColor(String portfolioBgColor) {
+        this.portfolioBgColor = portfolioBgColor;
+    }
+
+    public String getGlobalFont() {
+        return globalFont;
+    }
+
+    public void setGlobalFont(String globalFont) {
+        this.globalFont = globalFont;
     }
 
     public LocalDateTime getUpdatedAt() {

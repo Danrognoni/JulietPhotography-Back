@@ -327,6 +327,7 @@ public class AlbumService {
                 if (item.getHeight() != null) album.setHeight(item.getHeight());
                 if (item.getRotation() != null) album.setRotation(item.getRotation());
                 if (item.getZIndex() != null) album.setZIndex(item.getZIndex());
+                if (item.getBackgroundColor() != null) album.setBackgroundColor(item.getBackgroundColor().trim());
                 album.setUpdatedAt(LocalDateTime.now());
                 albumRepository.save(album);
             }

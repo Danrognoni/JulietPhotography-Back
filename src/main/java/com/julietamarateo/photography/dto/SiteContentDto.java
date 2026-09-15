@@ -44,6 +44,9 @@ public class SiteContentDto {
 
     private String footerText;
     private String copyrightText;
+    private String portfolioTitle;
+    private String portfolioBgColor;
+    private String globalFont;
 
     public SiteContentDto() {
     }
@@ -91,6 +94,9 @@ public class SiteContentDto {
 
         dto.setFooterText(entity.getFooterText());
         dto.setCopyrightText(entity.getCopyrightText());
+        dto.setPortfolioTitle(entity.getPortfolioTitle());
+        dto.setPortfolioBgColor(entity.getPortfolioBgColor());
+        dto.setGlobalFont(entity.getGlobalFont());
         return dto;
     }
 
@@ -136,6 +142,9 @@ public class SiteContentDto {
 
         if (this.footerText != null) entity.setFooterText(this.footerText.trim());
         if (this.copyrightText != null) entity.setCopyrightText(this.copyrightText.trim());
+        if (this.portfolioTitle != null) entity.setPortfolioTitle(this.portfolioTitle.trim());
+        if (this.portfolioBgColor != null) entity.setPortfolioBgColor(this.portfolioBgColor.trim());
+        if (this.globalFont != null) entity.setGlobalFont(this.globalFont.trim());
     }
 
     public String getBrandName() { return brandName; }
@@ -239,4 +248,13 @@ public class SiteContentDto {
 
     public String getCopyrightText() { return copyrightText; }
     public void setCopyrightText(String copyrightText) { this.copyrightText = copyrightText; }
+
+    public String getPortfolioTitle() { return portfolioTitle; }
+    public void setPortfolioTitle(String portfolioTitle) { this.portfolioTitle = portfolioTitle; }
+
+    public String getPortfolioBgColor() { return portfolioBgColor; }
+    public void setPortfolioBgColor(String portfolioBgColor) { this.portfolioBgColor = portfolioBgColor; }
+
+    public String getGlobalFont() { return globalFont; }
+    public void setGlobalFont(String globalFont) { this.globalFont = globalFont; }
 }

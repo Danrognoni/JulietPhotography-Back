@@ -31,6 +31,10 @@ public class AlbumLayoutDto {
     @JsonAlias({"zIndex", "zindex", "z_index"})
     private Integer zIndex = 1;
 
+    @JsonProperty("backgroundColor")
+    @JsonAlias({"backgroundColor", "background_color", "bgColor", "bg_color"})
+    private String backgroundColor;
+
     public AlbumLayoutDto() {
     }
 
@@ -124,5 +128,13 @@ public class AlbumLayoutDto {
 
     public void setY(Double y) {
         this.yPos = y;
+    }
+
+    public String getBackgroundColor() {
+        return backgroundColor;
+    }
+
+    public void setBackgroundColor(String backgroundColor) {
+        this.backgroundColor = backgroundColor;
     }
 }
