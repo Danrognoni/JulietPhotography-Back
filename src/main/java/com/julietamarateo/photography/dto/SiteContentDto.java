@@ -47,6 +47,12 @@ public class SiteContentDto {
     private String portfolioTitle;
     private String portfolioBgColor;
     private String globalFont;
+    private String sobreMiBgColor;
+    private String faqBgColor;
+    private String contactoBgColor;
+    private Boolean isFaqVisible;
+    private Boolean isSobreMiVisible;
+    private Boolean isContactoVisible;
 
     public SiteContentDto() {
     }
@@ -97,6 +103,12 @@ public class SiteContentDto {
         dto.setPortfolioTitle(entity.getPortfolioTitle());
         dto.setPortfolioBgColor(entity.getPortfolioBgColor());
         dto.setGlobalFont(entity.getGlobalFont());
+        dto.setSobreMiBgColor(entity.getSobreMiBgColor());
+        dto.setFaqBgColor(entity.getFaqBgColor());
+        dto.setContactoBgColor(entity.getContactoBgColor());
+        dto.setIsFaqVisible(entity.getIsFaqVisible() != null ? entity.getIsFaqVisible() : true);
+        dto.setIsSobreMiVisible(entity.getIsSobreMiVisible() != null ? entity.getIsSobreMiVisible() : true);
+        dto.setIsContactoVisible(entity.getIsContactoVisible() != null ? entity.getIsContactoVisible() : true);
         return dto;
     }
 
@@ -145,6 +157,12 @@ public class SiteContentDto {
         if (this.portfolioTitle != null) entity.setPortfolioTitle(this.portfolioTitle.trim());
         if (this.portfolioBgColor != null) entity.setPortfolioBgColor(this.portfolioBgColor.trim());
         if (this.globalFont != null) entity.setGlobalFont(this.globalFont.trim());
+        if (this.sobreMiBgColor != null) entity.setSobreMiBgColor(this.sobreMiBgColor.trim());
+        if (this.faqBgColor != null) entity.setFaqBgColor(this.faqBgColor.trim());
+        if (this.contactoBgColor != null) entity.setContactoBgColor(this.contactoBgColor.trim());
+        if (this.isFaqVisible != null) entity.setIsFaqVisible(this.isFaqVisible);
+        if (this.isSobreMiVisible != null) entity.setIsSobreMiVisible(this.isSobreMiVisible);
+        if (this.isContactoVisible != null) entity.setIsContactoVisible(this.isContactoVisible);
     }
 
     public String getBrandName() { return brandName; }
@@ -257,4 +275,22 @@ public class SiteContentDto {
 
     public String getGlobalFont() { return globalFont; }
     public void setGlobalFont(String globalFont) { this.globalFont = globalFont; }
+
+    public String getSobreMiBgColor() { return sobreMiBgColor; }
+    public void setSobreMiBgColor(String sobreMiBgColor) { this.sobreMiBgColor = sobreMiBgColor; }
+
+    public String getFaqBgColor() { return faqBgColor; }
+    public void setFaqBgColor(String faqBgColor) { this.faqBgColor = faqBgColor; }
+
+    public String getContactoBgColor() { return contactoBgColor; }
+    public void setContactoBgColor(String contactoBgColor) { this.contactoBgColor = contactoBgColor; }
+
+    public Boolean getIsFaqVisible() { return isFaqVisible != null ? isFaqVisible : true; }
+    public void setIsFaqVisible(Boolean isFaqVisible) { this.isFaqVisible = isFaqVisible; }
+
+    public Boolean getIsSobreMiVisible() { return isSobreMiVisible != null ? isSobreMiVisible : true; }
+    public void setIsSobreMiVisible(Boolean isSobreMiVisible) { this.isSobreMiVisible = isSobreMiVisible; }
+
+    public Boolean getIsContactoVisible() { return isContactoVisible != null ? isContactoVisible : true; }
+    public void setIsContactoVisible(Boolean isContactoVisible) { this.isContactoVisible = isContactoVisible; }
 }

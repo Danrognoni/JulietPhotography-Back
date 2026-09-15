@@ -90,6 +90,24 @@ public class SiteContent {
     @Column(name = "global_font", length = 64)
     private String globalFont;
 
+    @Column(name = "sobre_mi_bg_color", length = 32)
+    private String sobreMiBgColor;
+
+    @Column(name = "faq_bg_color", length = 32)
+    private String faqBgColor;
+
+    @Column(name = "contacto_bg_color", length = 32)
+    private String contactoBgColor;
+
+    @Column(name = "is_faq_visible")
+    private Boolean isFaqVisible = true;
+
+    @Column(name = "is_sobre_mi_visible")
+    private Boolean isSobreMiVisible = true;
+
+    @Column(name = "is_contacto_visible")
+    private Boolean isContactoVisible = true;
+
     private LocalDateTime updatedAt = LocalDateTime.now();
 
     public SiteContent() {
@@ -397,6 +415,54 @@ public class SiteContent {
 
     public void setGlobalFont(String globalFont) {
         this.globalFont = globalFont;
+    }
+
+    public String getSobreMiBgColor() {
+        return sobreMiBgColor;
+    }
+
+    public void setSobreMiBgColor(String sobreMiBgColor) {
+        this.sobreMiBgColor = sobreMiBgColor;
+    }
+
+    public String getFaqBgColor() {
+        return faqBgColor;
+    }
+
+    public void setFaqBgColor(String faqBgColor) {
+        this.faqBgColor = faqBgColor;
+    }
+
+    public String getContactoBgColor() {
+        return contactoBgColor;
+    }
+
+    public void setContactoBgColor(String contactoBgColor) {
+        this.contactoBgColor = contactoBgColor;
+    }
+
+    public Boolean getIsFaqVisible() {
+        return isFaqVisible != null ? isFaqVisible : true;
+    }
+
+    public void setIsFaqVisible(Boolean isFaqVisible) {
+        this.isFaqVisible = isFaqVisible;
+    }
+
+    public Boolean getIsSobreMiVisible() {
+        return isSobreMiVisible != null ? isSobreMiVisible : true;
+    }
+
+    public void setIsSobreMiVisible(Boolean isSobreMiVisible) {
+        this.isSobreMiVisible = isSobreMiVisible;
+    }
+
+    public Boolean getIsContactoVisible() {
+        return isContactoVisible != null ? isContactoVisible : true;
+    }
+
+    public void setIsContactoVisible(Boolean isContactoVisible) {
+        this.isContactoVisible = isContactoVisible;
     }
 
     public LocalDateTime getUpdatedAt() {

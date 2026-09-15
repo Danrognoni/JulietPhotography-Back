@@ -148,6 +148,12 @@ public class SiteContentService {
         sc.setPortfolioTitle("PORTFOLIO & EXPEDICIONES");
         sc.setPortfolioBgColor("#edf3f8");
         sc.setGlobalFont("Playfair Display");
+        sc.setSobreMiBgColor("#faf9f6");
+        sc.setFaqBgColor("#faf9f6");
+        sc.setContactoBgColor("#ffffff");
+        sc.setIsFaqVisible(true);
+        sc.setIsSobreMiVisible(true);
+        sc.setIsContactoVisible(true);
         sc.setUpdatedAt(LocalDateTime.now());
 
         return siteContentRepository.save(sc);

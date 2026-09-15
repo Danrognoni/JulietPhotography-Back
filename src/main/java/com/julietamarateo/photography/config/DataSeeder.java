@@ -124,6 +124,15 @@ public class DataSeeder implements CommandLineRunner {
 
             sc.setFooterText("Journeys captured beyond the postcard view. All images shot on location worldwide.");
             sc.setCopyrightText("© 2026 Julieta Marateo. All rights reserved.");
+            sc.setPortfolioTitle("PORTFOLIO & EXPEDICIONES");
+            sc.setPortfolioBgColor("#edf3f8");
+            sc.setGlobalFont("Playfair Display");
+            sc.setSobreMiBgColor("#faf9f6");
+            sc.setFaqBgColor("#faf9f6");
+            sc.setContactoBgColor("#ffffff");
+            sc.setIsFaqVisible(true);
+            sc.setIsSobreMiVisible(true);
+            sc.setIsContactoVisible(true);
             sc.setUpdatedAt(LocalDateTime.now());
 
             siteContentRepository.save(sc);
