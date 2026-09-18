@@ -19,10 +19,25 @@ public class MercadoPagoController {
 
     private final MercadoPagoService mercadoPagoService;
     private final OrderRepository orderRepository;
+    private final com.julietamarateo.photography.config.MercadoPagoConfig mercadoPagoConfig;
 
-    public MercadoPagoController(MercadoPagoService mercadoPagoService, OrderRepository orderRepository) {
+    public MercadoPagoController(MercadoPagoService mercadoPagoService, 
+                                  OrderRepository orderRepository,
+                                  com.julietamarateo.photography.config.MercadoPagoConfig mercadoPagoConfig) {
         this.mercadoPagoService = mercadoPagoService;
         this.orderRepository = orderRepository;
+        this.mercadoPagoConfig = mercadoPagoConfig;
+    }
+
+    /**
+     * Endpoint público para obtener la clave pública y el Collector ID de Mercado Pago.
+     */
+    @GetMapping("/api/mercadopago/config")
+    public ResponseEntity<Map<String, String>> getMercadoPagoConfig() {
+        return ResponseEntity.ok(Map.of(
+                "publicKey", mercadoPagoConfig.getPublicKey() != null ? mercadoPagoConfig.getPublicKey() : "",
+                "collectorId", mercadoPagoConfig.getCollectorId() != null ? mercadoPagoConfig.getCollectorId() : ""
+        ));
     }
 
     /**

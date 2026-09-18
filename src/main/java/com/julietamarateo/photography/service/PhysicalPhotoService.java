@@ -32,13 +32,13 @@ public class PhysicalPhotoService {
     private final PhysicalPhotoRepository photoRepository;
     private final FileStorageService fileStorageService;
 
-    @Value("${mercadopago.back-urls.success:http://localhost:4200/?status=approved}")
+    @Value("${mercadopago.back-urls.success:https://juli-fotografia-front.vercel.app/?status=approved}")
     private String backUrlSuccess;
 
-    @Value("${mercadopago.back-urls.failure:http://localhost:4200/?status=rejected}")
+    @Value("${mercadopago.back-urls.failure:https://juli-fotografia-front.vercel.app/?status=rejected}")
     private String backUrlFailure;
 
-    @Value("${mercadopago.back-urls.pending:http://localhost:4200/?status=pending}")
+    @Value("${mercadopago.back-urls.pending:https://juli-fotografia-front.vercel.app/?status=pending}")
     private String backUrlPending;
 
     public PhysicalPhotoService(PhysicalPhotoRepository photoRepository, FileStorageService fileStorageService) {
@@ -162,6 +162,11 @@ public class PhysicalPhotoService {
             throw new IllegalStateException("Esta pieza física se encuentra agotada");
         }
 
+        if (photo.getPrice() == null || photo.getPrice() <= 0) {
+            String title = photo.getTitle() != null ? photo.getTitle() : photo.getId();
+            throw new IllegalArgumentException("La foto física '" + title + "' debe tener un precio válido mayor a cero");
+        }
+
         int finalQty = Math.max(1, Math.min(quantity, 2)); // 1 o 2 unidades máximo
 
         // Si la foto tiene un link directo de Mercado Pago cargado manualmente por el admin, retornarlo
@@ -178,7 +183,7 @@ public class PhysicalPhotoService {
             List<PreferenceItemRequest> items = new ArrayList<>();
             PreferenceItemRequest itemRequest = PreferenceItemRequest.builder()
                     .id(photo.getId())
-                    .title("Copia Física: " + photo.getTitle())
+                    .title("Copia Física: " + (photo.getTitle() != null ? photo.getTitle() : "Obra fotográfica"))
                     .description("Impresión fotográfica Fine Art de autor firmada")
                     .quantity(finalQty)
                     .unitPrice(BigDecimal.valueOf(photo.getPrice()))
@@ -187,14 +192,15 @@ public class PhysicalPhotoService {
             items.add(itemRequest);
 
             PreferenceBackUrlsRequest backUrls = PreferenceBackUrlsRequest.builder()
-                    .success(backUrlSuccess != null ? backUrlSuccess.trim() : "http://localhost:4200/?status=approved")
-                    .failure(backUrlFailure != null ? backUrlFailure.trim() : "http://localhost:4200/?status=rejected")
-                    .pending(backUrlPending != null ? backUrlPending.trim() : "http://localhost:4200/?status=pending")
+                    .success(backUrlSuccess != null && !backUrlSuccess.isBlank() ? backUrlSuccess.trim() : "https://juli-fotografia-front.vercel.app/?status=approved")
+                    .failure(backUrlFailure != null && !backUrlFailure.isBlank() ? backUrlFailure.trim() : "https://juli-fotografia-front.vercel.app/?status=rejected")
+                    .pending(backUrlPending != null && !backUrlPending.isBlank() ? backUrlPending.trim() : "https://juli-fotografia-front.vercel.app/?status=pending")
                     .build();
 
             PreferenceRequest request = PreferenceRequest.builder()
                     .items(items)
                     .backUrls(backUrls)
+                    .autoReturn("approved")
                     .externalReference("PHYSICAL-" + photo.getId() + "-" + System.currentTimeMillis())
                     .build();
 

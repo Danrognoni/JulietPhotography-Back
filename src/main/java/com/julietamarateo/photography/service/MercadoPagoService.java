@@ -36,16 +36,16 @@ public class MercadoPagoService {
     private final OrderRepository orderRepository;
     private final PaymentRecordRepository paymentRecordRepository;
 
-    @Value("${mercadopago.back-urls.success:http://localhost:4200/cart?status=approved}")
+    @Value("${mercadopago.back-urls.success:https://juli-fotografia-front.vercel.app/?status=approved}")
     private String backUrlSuccess;
 
-    @Value("${mercadopago.back-urls.failure:http://localhost:4200/cart?status=rejected}")
+    @Value("${mercadopago.back-urls.failure:https://juli-fotografia-front.vercel.app/?status=rejected}")
     private String backUrlFailure;
 
-    @Value("${mercadopago.back-urls.pending:http://localhost:4200/cart?status=pending}")
+    @Value("${mercadopago.back-urls.pending:https://juli-fotografia-front.vercel.app/?status=pending}")
     private String backUrlPending;
 
-    @Value("${mercadopago.notification-url:https://tu-dominio.com/api/mercadopago/webhook}")
+    @Value("${mercadopago.notification-url:https://julietphotograph-back.onrender.com/api/mercadopago/webhook}")
     private String notificationUrl;
 
     public MercadoPagoService(OrderRepository orderRepository, PaymentRecordRepository paymentRecordRepository) {
@@ -64,28 +64,34 @@ public class MercadoPagoService {
 
         List<PreferenceItemRequest> items = new ArrayList<>();
         for (OrderItem item : order.getItems()) {
+            if (item.getUnitPrice() == null || item.getUnitPrice() <= 0) {
+                String title = item.getPhotoTitle() != null ? item.getPhotoTitle() : item.getPhotoId();
+                throw new IllegalArgumentException("El precio unitario del ítem '" + title + "' debe ser un monto válido mayor a cero");
+            }
+            int quantity = (item.getQuantity() != null && item.getQuantity() > 0) ? item.getQuantity() : 1;
+
             PreferenceItemRequest itemRequest = PreferenceItemRequest.builder()
                     .id(item.getPhotoId())
-                    .title(item.getPhotoTitle() != null ? item.getPhotoTitle() : "Fotografía Juliet Photography")
-                    .quantity(item.getQuantity())
+                    .title(item.getPhotoTitle() != null && !item.getPhotoTitle().isBlank() ? item.getPhotoTitle() : "Fotografía Juliet Photography")
+                    .quantity(quantity)
                     .unitPrice(BigDecimal.valueOf(item.getUnitPrice()))
                     .currencyId("ARS")
                     .build();
             items.add(itemRequest);
         }
 
-        // Sanitizar y validar URLs de retorno
+        // Sanitizar y validar URLs de retorno apuntando al frontend
         String successUrl = (backUrlSuccess != null && !backUrlSuccess.isBlank())
                 ? backUrlSuccess.trim()
-                : "http://localhost:4200/cart?status=approved";
+                : "https://juli-fotografia-front.vercel.app/?status=approved";
 
         String failureUrl = (backUrlFailure != null && !backUrlFailure.isBlank())
                 ? backUrlFailure.trim()
-                : "http://localhost:4200/cart?status=rejected";
+                : "https://juli-fotografia-front.vercel.app/?status=rejected";
 
         String pendingUrl = (backUrlPending != null && !backUrlPending.isBlank())
                 ? backUrlPending.trim()
-                : "http://localhost:4200/cart?status=pending";
+                : "https://juli-fotografia-front.vercel.app/?status=pending";
 
         PreferenceBackUrlsRequest backUrls = PreferenceBackUrlsRequest.builder()
                 .success(successUrl)
@@ -99,6 +105,7 @@ public class MercadoPagoService {
         PreferenceRequest.PreferenceRequestBuilder requestBuilder = PreferenceRequest.builder()
                 .items(items)
                 .backUrls(backUrls)
+                .autoReturn("approved")
                 .externalReference(order.getId());
 
         if (notificationUrl != null && !notificationUrl.isBlank() && !notificationUrl.contains("tu-dominio.com")) {

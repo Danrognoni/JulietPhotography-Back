@@ -102,6 +102,15 @@ public class MercadoPagoControllerTest {
     }
 
     @Test
+    @DisplayName("Configuración Pública: GET /api/mercadopago/config retorna publicKey y collectorId")
+    void testGetMercadoPagoConfigEndpoint() throws Exception {
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/api/mercadopago/config"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.publicKey").value("APP_USR-c427100c-ad91-4947-b7cc-751e1235f15d"))
+                .andExpect(jsonPath("$.collectorId").value("3666810022"));
+    }
+
+    @Test
     @DisplayName("Webhook IPN: POST /api/mercadopago/webhook con query params procesa pago y retorna 200 OK")
     void testWebhookWithQueryParams() throws Exception {
         mockMvc.perform(post("/api/mercadopago/webhook")

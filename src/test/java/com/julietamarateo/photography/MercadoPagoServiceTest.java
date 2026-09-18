@@ -53,15 +53,15 @@ class MercadoPagoServiceTest {
             }
         };
 
-        ReflectionTestUtils.setField(mercadoPagoService, "backUrlSuccess", "http://localhost:4200/cart?status=approved");
-        ReflectionTestUtils.setField(mercadoPagoService, "backUrlFailure", "http://localhost:4200/cart?status=rejected");
-        ReflectionTestUtils.setField(mercadoPagoService, "backUrlPending", "http://localhost:4200/cart?status=pending");
+        ReflectionTestUtils.setField(mercadoPagoService, "backUrlSuccess", "https://juli-fotografia-front.vercel.app/?status=approved");
+        ReflectionTestUtils.setField(mercadoPagoService, "backUrlFailure", "https://juli-fotografia-front.vercel.app/?status=rejected");
+        ReflectionTestUtils.setField(mercadoPagoService, "backUrlPending", "https://juli-fotografia-front.vercel.app/?status=pending");
         ReflectionTestUtils.setField(mercadoPagoService, "notificationUrl", "https://tu-dominio.com/api/mercadopago/webhook");
     }
 
     @Test
-    @DisplayName("createPreference debe construir PreferenceRequest sin autoReturn y con backUrls sanitizadas")
-    void testCreatePreferenceWithoutAutoReturn() {
+    @DisplayName("createPreference debe construir PreferenceRequest con autoReturn approved y con backUrls sanitizadas")
+    void testCreatePreferenceWithAutoReturnApproved() {
         Order order = new Order("ORD-TEST-123", "Cliente Test", "test@example.com", "Notas");
         order.addItem(new OrderItem("photo-1", "Foto Montaña", "Naturaleza", "http://img.jpg", 2, 2500.0));
 
@@ -74,11 +74,11 @@ class MercadoPagoServiceTest {
 
         PreferenceRequest capturedRequest = testPreferenceClient.capturedRequest;
         assertNotNull(capturedRequest);
-        assertNull(capturedRequest.getAutoReturn(), "autoReturn NO debe enviarse para evitar el error invalid_auto_return");
+        assertEquals("approved", capturedRequest.getAutoReturn(), "autoReturn debe ser 'approved'");
         assertNotNull(capturedRequest.getBackUrls());
-        assertEquals("http://localhost:4200/cart?status=approved", capturedRequest.getBackUrls().getSuccess());
-        assertEquals("http://localhost:4200/cart?status=rejected", capturedRequest.getBackUrls().getFailure());
-        assertEquals("http://localhost:4200/cart?status=pending", capturedRequest.getBackUrls().getPending());
+        assertEquals("https://juli-fotografia-front.vercel.app/?status=approved", capturedRequest.getBackUrls().getSuccess());
+        assertEquals("https://juli-fotografia-front.vercel.app/?status=rejected", capturedRequest.getBackUrls().getFailure());
+        assertEquals("https://juli-fotografia-front.vercel.app/?status=pending", capturedRequest.getBackUrls().getPending());
         assertEquals("ORD-TEST-123", capturedRequest.getExternalReference());
         assertEquals(1, capturedRequest.getItems().size());
         assertNull(capturedRequest.getNotificationUrl(), "notificationUrl con tu-dominio.com debe ser omitida");
@@ -97,7 +97,7 @@ class MercadoPagoServiceTest {
         PreferenceRequest capturedRequest = testPreferenceClient.capturedRequest;
         assertNotNull(capturedRequest);
         assertEquals("https://api.miestudiofotografico.com/api/mercadopago/webhook", capturedRequest.getNotificationUrl());
-        assertNull(capturedRequest.getAutoReturn());
+        assertEquals("approved", capturedRequest.getAutoReturn());
     }
 
     @Test
@@ -106,5 +106,13 @@ class MercadoPagoServiceTest {
         Order emptyOrder = new Order("ORD-EMPTY", "Cliente", "email@test.com", "");
         assertThrows(IllegalArgumentException.class, () -> mercadoPagoService.createPreference(emptyOrder));
         assertThrows(IllegalArgumentException.class, () -> mercadoPagoService.createPreference(null));
+    }
+
+    @Test
+    @DisplayName("createPreference debe lanzar IllegalArgumentException si algún ítem tiene precio nulo o menor/igual a cero")
+    void testCreatePreferenceItemPriceValidation() {
+        Order invalidOrder = new Order("ORD-INVALID", "Cliente", "email@test.com", "");
+        invalidOrder.addItem(new OrderItem("photo-free", "Foto Gratis", "Naturaleza", "http://img.jpg", 1, 0.0));
+        assertThrows(IllegalArgumentException.class, () -> mercadoPagoService.createPreference(invalidOrder));
     }
 }
