@@ -140,9 +140,10 @@ public class PhysicalPhotoService {
     public void reorderPhotos(List<String> orderedIds) {
         if (orderedIds == null || orderedIds.isEmpty()) return;
         for (int i = 0; i < orderedIds.size(); i++) {
+            final int order = i;
             String photoId = orderedIds.get(i);
             photoRepository.findById(photoId).ifPresent(p -> {
-                p.setDisplayOrder(i);
+                p.setDisplayOrder(order);
                 photoRepository.save(p);
             });
         }
